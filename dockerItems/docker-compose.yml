@@ -13,7 +13,7 @@ services:
     ports:
       - 5432:5432
     networks:
-      -  more-tech
+      -  backend
       
    hack-api:
     build:
@@ -25,7 +25,7 @@ services:
     ports:
       - "5000:5000"
     networks:
-      -  more-tech
+      -  backend
     depends_on:
       - db
     restart: always
@@ -53,6 +53,10 @@ services:
    # networks:
    #     - backend
    # restart: always
+
+networks:
+  backend:
+    driver: bridge
 
 volumes:
   db-hack-data:
