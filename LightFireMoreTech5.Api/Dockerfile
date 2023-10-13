@@ -9,7 +9,7 @@ COPY ["LightFireMoreTech5.Data/LightFireMoreTech5.Data.csproj", "LightFireMoreTe
 RUN dotnet restore "LightFireMoreTech5.Api/LightFireMoreTech5.csproj"
 COPY . .
 WORKDIR "/src/LightFireMoreTech5.Api"
-RUN dotnet build "LightFireMoreTech5.csproj -c Release -o /app/build
+RUN dotnet build "LightFireMoreTech5.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "LightFileMoreTech5.Api/LightFireMoreTech5.csproj" -c Release -o /app/publish /p:UseAppHost=false
