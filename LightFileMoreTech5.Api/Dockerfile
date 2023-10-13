@@ -1,30 +1,20 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
-COPY docker-startup.sh .
 EXPOSE 80
-EXPOSE 443
 
-RUN apt-get -y update
-RUN apt install -y libgdiplus
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-
 WORKDIR /src
-COPY ["LightFileMoreTech5.csproj", "./"]
-RUN dotnet restore "LightFileMoreTech5.csproj"
-WORKDIR "/src"
+COPY ["LightFileMoreTech5.Api/LightFireMoreTech5.csproj", "LightFireMoreTech5/"]
+COPY ["LightFireMoreTech5.Data/LightFireMoreTech5.Data.csproj", "LightFireMoreTech5.Data/"]
+RUN dotnet restore "LightFireMoreTech5.Api/LightFireMoreTech5.csproj"
 COPY . .
-RUN dotnet build "LightFileMoreTech5.csproj" -c Release -o /app/build
-
-RUN dotnet tool install --global dotnet-ef
-ENV PATH $PATH:/root/.dotnet/tools
+WORKDIR "/src/LightFireMoreTech5"
+RUN dotnet build "LightFireMoreTech5.csproj -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "LightFileMoreTech5.csproj" -c Release -o /app/publish
-
-RUN dotnet-ef migrations bundle -r linux-x64 -o /app/publish/bundle
+RUN dotnet publish "LightFireMoreTech5.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-ENTRYPOINT ["bash","docker-startup.sh"]
+ENTRYPOINT ["dotnet", "LightFireMoreTech5.dll"]
