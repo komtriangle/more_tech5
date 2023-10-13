@@ -36,6 +36,26 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
+		[HttpGet("GetAtm")]
+		public async Task<ActionResult> GetAtm(long id, CancellationToken token)
+		{
+			try
+			{
+				var atm = await _pointService.GetAtmByIdAsync(id, token);
+
+				if (atm == null)
+				{
+					return NotFound("Банкомат не найден");
+				}
+
+				return Ok(atm);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+
 		[HttpPost("FindPoints")]
 		public async Task<ActionResult> FindPoints([FromBody] FindPointModel request, CancellationToken token)
 		{

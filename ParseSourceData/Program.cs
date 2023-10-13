@@ -1,9 +1,12 @@
 ﻿using LightFireMoreTech5.Data;
 using LightFireMoreTech5.Data.Entities;
+using LightFireMoreTech5.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Noding;
 using Newtonsoft.Json;
+using System.Drawing;
+using Point = NetTopologySuite.Geometries.Point;
 
 namespace ParseSourceData
 {
@@ -34,9 +37,126 @@ namespace ParseSourceData
 			public bool? kep { get; set; }
 			public bool? myBranch { get; set; }
 		}
+
+		public class Service
+		{
+			public string serviceCapability { get; set; }
+			public string serviceActivity { get; set; }
+		}
+
+		public class Services
+		{
+			public Service wheelchair { get; set; }
+			public Service blind { get; set; }
+			public Service nfcForBankCards { get; set; }
+			public Service qrRead { get; set; }
+			public Service supportsUsd { get; set; }
+			public Service supportsChargeRub { get; set; }
+			public Service supportsEur { get; set; }
+			public Service supportsRub { get; set; }
+		}
+
+		public class AtmModel
+		{
+			public string address { get; set; }
+			public double latitude { get; set; }
+			public double longitude { get; set; }
+			public bool allDay { get; set; }
+			public Dictionary<string, Service> services { get; set; }
+
+		}
+
+
 		static void Main(string[] args)
 		{
-			string connectionString = "Host=localhost;port=5432;user id=lightFire;password=pass;database=postgres";
+			FillAtm();
+		}
+
+		private static void FillAtm()
+		{
+			string connectionString = "Host=193.104.57.178;port=5432;user id=lightFire;password=pass;database=postgres";
+
+			DbContextOptionsBuilder<BankServicesContext> dbContextOptionsBuilder = new DbContextOptionsBuilder<BankServicesContext>();
+
+			dbContextOptionsBuilder.UseNpgsql(connectionString, x => x.UseNetTopologySuite()).UseLowerCaseNamingConvention();
+
+			//var context = new BankServicesContext(dbContextOptionsBuilder.Options);
+
+			string json = File.ReadAllText(@"C:\Users\komda\Downloads\Data\atms.txt");
+
+			List<AtmModel> locations = JsonConvert.DeserializeObject<List<AtmModel>>(json);
+
+			foreach (AtmModel atm in locations)
+			{
+				var dbAtm = new Atm();
+				dbAtm.AllDay = atm.allDay;
+				dbAtm.Location = new NetTopologySuite.Geometries.Point(
+					new Coordinate(atm.latitude, atm.longitude))
+				{ SRID = 4326 };
+				dbAtm.Address = atm.address;
+
+				foreach(var service in atm.services)
+				{
+					ServiceCapability serviceCapability = service.Value.serviceCapability switch
+					{
+						"UNSUPPORTED" => ServiceCapability.Unsupported,
+						"UNKNOWN" => ServiceCapability.Unknown,
+						"SUPPORTED" => ServiceCapability.Supported
+					};
+
+					ServiceActivity serviceActivity = service.Value.serviceActivity switch
+					{
+						"UNAVAILABLE" => ServiceActivity.UnAvailable,
+						"UNKNOWN" => ServiceActivity.Unknown,
+						"AVAILABLE" => ServiceActivity.Available
+					};
+
+					switch (service.Key)
+					{
+						case nameof(Services.wheelchair):
+							dbAtm.WheelChairActivity = serviceActivity;
+							dbAtm.WheelChairCapability = serviceCapability;
+							break;
+						case nameof(Services.blind):
+							dbAtm.BlindChairActivity = serviceActivity;
+							dbAtm.BlindCapability = serviceCapability;
+							break;
+						case nameof(Services.nfcForBankCards):
+							dbAtm.NfcBankCardsActivity = serviceActivity;
+							dbAtm.NfcBankCardsCapability = serviceCapability;
+							break;
+						case nameof(Services.qrRead):
+							dbAtm.QrReadActivity = serviceActivity;
+							dbAtm.QrReadCapability = serviceCapability;
+							break;
+						case nameof(Services.supportsUsd):
+							dbAtm.SupportUsdActivity = serviceActivity;
+							dbAtm.SupportUsdCapability = serviceCapability;
+							break;
+						case nameof(Services.supportsRub):
+							dbAtm.SupportRubActivity = serviceActivity;
+							dbAtm.SupportRubCapability = serviceCapability;
+							break;
+						case nameof(Services.supportsEur):
+							dbAtm.SupportEurActivity = serviceActivity;
+							dbAtm.SupportEurCapability = serviceCapability;
+							break;
+						case nameof(Services.supportsChargeRub):
+							dbAtm.SupportChargeRubActivity = serviceActivity;
+							dbAtm.SupportChargeRubCapability = serviceCapability;
+							break;
+					}
+				}
+
+                Console.WriteLine(atm);
+
+
+            }
+		}
+
+		private static void FillOffices()
+		{
+			string connectionString = "Host=193.104.57.178;port=5432;user id=lightFire;password=pass;database=postgres";
 
 			DbContextOptionsBuilder<BankServicesContext> dbContextOptionsBuilder = new DbContextOptionsBuilder<BankServicesContext>();
 
@@ -64,7 +184,7 @@ namespace ParseSourceData
 					new Coordinate(point.latitude, point.longitude))
 				{ SRID = 4326 };
 
-				var legalSchedule = new OfficeSchedule() {};
+				var legalSchedule = new OfficeSchedule() { };
 
 				foreach (OpenHour openHour in point.openHours)
 				{
@@ -76,13 +196,13 @@ namespace ParseSourceData
 
 						if (openHour.hours != "выходной")
 						{
-							start =TimeOnly.Parse(openHour.hours.Split('-')[0]);
+							start = TimeOnly.Parse(openHour.hours.Split('-')[0]);
 							end = TimeOnly.Parse(openHour.hours.Split('-')[1]);
 						}
-						
+
 						switch (openHour.days)
 						{
-							
+
 							case "пн":
 								legalSchedule.MondayStart = start;
 								legalSchedule.MondayEnd = end;
@@ -115,7 +235,7 @@ namespace ParseSourceData
 
 						}
 					}
-					else if(openHour.hours == "пн-пт")
+					else if (openHour.hours == "пн-пт")
 					{
 						TimeOnly? start = null;
 						TimeOnly? end = null;
@@ -144,7 +264,7 @@ namespace ParseSourceData
 					}
 				}
 
-				var individualSchedule = new OfficeSchedule() {  };
+				var individualSchedule = new OfficeSchedule() { };
 
 				foreach (OpenHour openHour in point.openHoursIndividual)
 				{
