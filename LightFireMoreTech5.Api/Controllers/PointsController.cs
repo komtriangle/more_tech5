@@ -16,7 +16,7 @@ namespace LightFireMoreTech5.Controllers
 			_pointService = pointService;
 		}
 
-		[HttpGet("GetOffice")]
+		[HttpGet("Office")]
 		public async Task<ActionResult> GetOffice(long id, CancellationToken token)
 		{
 			try
@@ -36,7 +36,7 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
-		[HttpGet("GetAtm")]
+		[HttpGet("Atm")]
 		public async Task<ActionResult> GetAtm(long id, CancellationToken token)
 		{
 			try
