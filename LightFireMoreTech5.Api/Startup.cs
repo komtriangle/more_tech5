@@ -1,4 +1,6 @@
 ﻿using LightFireMoreTech5.Data;
+using LightFireMoreTech5.Services;
+using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LightFileMoreTech5
@@ -28,9 +30,13 @@ namespace LightFileMoreTech5
 
 			services.AddControllers();
 
+			services.AddSwaggerGen();
+
+			services.AddTransient<IPointService, PointService>();
+
 			services.AddDbContext<BankServicesContext>(options => options
 					  .UseNpgsql(_configuration.GetConnectionString("PostgreConnectionString"),
-					  x => x.UseNetTopologySuite())
+					  x => x.UseNetTopologySuite().MigrationsAssembly("LightFireMoreTech5"))
 			   .UseLowerCaseNamingConvention());
 
 		}

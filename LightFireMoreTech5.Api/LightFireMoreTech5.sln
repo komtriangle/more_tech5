@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightFireMoreTech5", "LightFireMoreTech5.csproj", "{CE23EEE0-B90D-4915-AE9C-694253A9F343}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightFireMoreTech5.Data", "..\LightFireMoreTech5.Data\LightFireMoreTech5.Data.csproj", "{E27E10AA-2A61-4F27-A3D9-9ED58108BF5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightFireMoreTech5.Data", "..\LightFireMoreTech5.Data\LightFireMoreTech5.Data.csproj", "{E27E10AA-2A61-4F27-A3D9-9ED58108BF5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseSourceData", "..\ParseSourceData\ParseSourceData.csproj", "{B4406F02-1E06-4A2A-9733-52BFB9A3DFFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{E27E10AA-2A61-4F27-A3D9-9ED58108BF5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E27E10AA-2A61-4F27-A3D9-9ED58108BF5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E27E10AA-2A61-4F27-A3D9-9ED58108BF5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4406F02-1E06-4A2A-9733-52BFB9A3DFFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4406F02-1E06-4A2A-9733-52BFB9A3DFFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4406F02-1E06-4A2A-9733-52BFB9A3DFFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4406F02-1E06-4A2A-9733-52BFB9A3DFFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

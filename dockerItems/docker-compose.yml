@@ -1,21 +1,31 @@
-version: '3.8'
+version: '3.1'
 networks:
   backend:
     driver: bridge
 services:
-  hack-api:
-    container_name: hack-backend
-    image: hack-image
+   db:
+    image: postgis/postgis
+    restart: always
     env_file:
-      - .env
+      - postgis.env
     environment:
-      DB_HOST: '${DB_HOST}'
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - 5432:5432
+    networks:
+      -  backend
+      
+   hack-api:
+    build:
+      context: ..
+      dockerfile: LightFireMoreTech5.Api/Dockerfile
+    environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5000/
     ports:
       - "5000:5000"
     networks:
-      - backend
+      -  backend
     depends_on:
       - db
     restart: always
@@ -29,50 +39,24 @@ services:
       timeout: 10s
       retries: 3
 
-  hack-db:
-    image: postgres:15
-    container_name: my-hack-postgres
-    env_file:
-      - .env
-    environment:
-      PGPASSWORD: '${DB_PASSWORD}'
-      POSTGRES_DB: '${DB_NAME}'
-      PGUSER: '${DB_USERNAME}'
-      POSTGRES_PASSWORD: '${DB_PASSWORD}'
-    volumes:
-      - db-hack-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - backend
-    restart: always
+   #hack-redis:
+   # container_name: my-hack-redis
+   # image: redis:7.2-rc2
+   # env_file:
+   #     - .env
+   # environment:
+   #     - REDIS_PASSWORD=${DB_PASSWORD}
+   # ports:
+   #     - "5379:5379"
+   # volumes:
+   #     - redis-hack-data:/data
+   # networks:
+   #     - backend
+   # restart: always
 
-  db:
-    image: postgis/postgis
-    restart: always
-    env_file:
-      - .env
-    environment:
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    ports:
-      - 5432:5432
-    networks:
-      -  backend
-
-  hack-redis:
-    container_name: my-hack-redis
-    image: redis:7.2-rc2
-    env_file:
-      - .env
-    environment:
-      - REDIS_PASSWORD=${DB_PASSWORD}
-    ports:
-      - "5379:5379"
-    volumes:
-      - redis-hack-data:/data
-    networks:
-      - backend
-    restart: always
+networks:
+  backend:
+    driver: bridge
 
 volumes:
   db-hack-data:
