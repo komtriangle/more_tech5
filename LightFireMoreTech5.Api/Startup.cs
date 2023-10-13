@@ -1,4 +1,5 @@
-﻿using LightFireMoreTech5.Data;
+﻿using LightFileMoreTech5.Configuration;
+using LightFireMoreTech5.Data;
 using LightFireMoreTech5.Services;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -35,9 +36,25 @@ namespace LightFileMoreTech5
 				options.JsonSerializerOptions.IgnoreNullValues = true;
 			});
 
+			IConfigurationSection graphHopperConfigurationSection = _configuration.GetSection(nameof(GraphHopperConfiguration))
+				?? throw new ArgumentNullException(nameof(GraphHopperConfiguration));
+
+			services.Configure<GraphHopperConfiguration>(graphHopperConfigurationSection);
+
+			GraphHopperConfiguration graphHopperConfiguration = graphHopperConfigurationSection.Get<GraphHopperConfiguration>()
+				?? throw new ArgumentNullException(nameof(GraphHopperConfiguration));
+
+			services.AddHttpClient("graphHopper", client =>
+			{
+				client.DefaultRequestHeaders.Add("Cotnent-Type", "application/json");
+				client.DefaultRequestHeaders.Add("accept-language", "RU");
+				client.BaseAddress = new Uri(graphHopperConfiguration.Host);
+			});
+
 			services.AddSwaggerGen();
 
 			services.AddTransient<IPointService, PointService>();
+			services.AddTransient<IPathService, PathService>();
 
 			services.AddDbContext<BankServicesContext>(options => options
 					  .UseNpgsql(_configuration.GetConnectionString("PostgreConnectionString"),
