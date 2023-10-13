@@ -38,6 +38,7 @@ namespace LightFileMoreTech5
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BankServicesContext context)
 		{
 			context.Database.Migrate();
+			context.SeedServices();
 
 			app.UseSwagger();
 			app.UseSwaggerUI();
