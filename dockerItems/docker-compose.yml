@@ -47,6 +47,18 @@ services:
       - backend
     restart: always
 
+  db:
+    image: postgis/postgis
+    restart: always
+    env_file:
+      - .env
+    environment:
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - 5432:5432
+    networks:
+      -  backend
+
   hack-redis:
     container_name: my-hack-redis
     image: redis:7.2-rc2
