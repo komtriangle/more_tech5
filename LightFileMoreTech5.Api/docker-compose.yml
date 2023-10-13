@@ -1,0 +1,67 @@
+version: '3.8'
+networks:
+  backend:
+    driver: bridge
+services:
+  hack-api:
+    container_name: hack-backend
+    image: hack-image
+    env_file:
+      - .env
+    environment:
+      DB_HOST: '${DB_HOST}'
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5000/
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+    depends_on:
+      - db
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail http://localhost:5000/health || exit 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  hack-db:
+    image: postgres:15
+    container_name: my-hack-postgres
+    env_file:
+      - .env
+    environment:
+      PGPASSWORD: '${DB_PASSWORD}'
+      POSTGRES_DB: '${DB_NAME}'
+      PGUSER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - db-hack-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    restart: always
+
+  hack-redis:
+    container_name: my-hack-redis
+    image: redis:7.2-rc2
+    env_file:
+      - .env
+    environment:
+      - REDIS_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5379:5379"
+    volumes:
+      - redis-hack-data:/data
+    networks:
+      - backend
+    restart: always
+
+volumes:
+  db-hack-data:
+  redis-hack-data:
