@@ -80,7 +80,7 @@ namespace ParseSourceData
 
 			dbContextOptionsBuilder.UseNpgsql(connectionString, x => x.UseNetTopologySuite()).UseLowerCaseNamingConvention();
 
-			//var context = new BankServicesContext(dbContextOptionsBuilder.Options);
+			var context = new BankServicesContext(dbContextOptionsBuilder.Options);
 
 			string json = File.ReadAllText(@"C:\Users\komda\Downloads\Data\atms.txt");
 
@@ -150,8 +150,10 @@ namespace ParseSourceData
 
                 Console.WriteLine(atm);
 
-
+				context.Atms.Add(dbAtm);
             }
+
+			context.SaveChanges();
 		}
 
 		private static void FillOffices()

@@ -2,6 +2,7 @@
 using LightFireMoreTech5.Services;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace LightFileMoreTech5
 {
@@ -28,7 +29,11 @@ namespace LightFileMoreTech5
 					});
 			});
 
-			services.AddControllers();
+			services.AddControllers().AddJsonOptions(options =>
+			{
+				options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+				options.JsonSerializerOptions.IgnoreNullValues = true;
+			});
 
 			services.AddSwaggerGen();
 
