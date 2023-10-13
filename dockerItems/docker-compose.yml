@@ -16,7 +16,6 @@ services:
       -  more-tech
       
    hack-api:
-    container_name: hack-backend
     build:
       context: ..
       dockerfile: LightFireMoreTech5.Api/Dockerfile
@@ -40,19 +39,19 @@ services:
       timeout: 10s
       retries: 3
 
-  hack-redis:
+   hack-redis:
     container_name: my-hack-redis
     image: redis:7.2-rc2
     env_file:
-      - .env
+        - .env
     environment:
-      - REDIS_PASSWORD=${DB_PASSWORD}
+        - REDIS_PASSWORD=${DB_PASSWORD}
     ports:
-      - "5379:5379"
+        - "5379:5379"
     volumes:
-      - redis-hack-data:/data
+        - redis-hack-data:/data
     networks:
-      - backend
+        - backend
     restart: always
 
 volumes:
