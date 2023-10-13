@@ -85,6 +85,8 @@ namespace LightFireMoreTech5.Services
 				return new OfficeModel()
 				{
 					Id = id,
+					Latitude = dbOffice.Location.Coordinate.X,
+					Longitude = dbOffice.Location.Coordinate.Y,
 					Name = dbOffice.Name,
 					AllDay = dbOffice.AllDay,
 					Address = dbOffice.Address,
