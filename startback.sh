@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DOCKERFILE_PATH="./Dockerfile"
-DOCKER_COMPOSE_PATH="./docker-compose.yml"
+DOCKERFILE_PATH="./dockerItems/Dockerfile"
+DOCKER_COMPOSE_PATH="./dockerItems/docker-compose.yml"
 DOCKER_IMAGE_NAME="hack-image"
 
 echo "Шаг 1: Сборка Docker-образа из Dockerfile"
