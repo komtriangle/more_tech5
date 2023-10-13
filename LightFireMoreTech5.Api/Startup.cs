@@ -1,4 +1,6 @@
-﻿using LightFileMoreTech5.Configuration;
+﻿using LightFireMoreTech5.Api.Services;
+using LightFireMoreTech5.Api.Services.Interfaces;
+using LightFileMoreTech5.Configuration;
 using LightFireMoreTech5.Data;
 using LightFireMoreTech5.Services;
 using LightFireMoreTech5.Services.Interfaces;
@@ -54,6 +56,7 @@ namespace LightFileMoreTech5
 			services.AddSwaggerGen();
 
 			services.AddTransient<IPointService, PointService>();
+			services.AddTransient<IServiceService, ServiceService>();
 			services.AddTransient<IPathService, PathService>();
 
 			services.AddDbContext<BankServicesContext>(options => options
