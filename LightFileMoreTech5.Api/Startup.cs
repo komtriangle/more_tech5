@@ -1,4 +1,7 @@
-﻿namespace LightFileMoreTech5
+﻿using LightFireMoreTech5.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace LightFileMoreTech5
 {
 	public class Startup
 	{
@@ -23,10 +26,18 @@
 					});
 			});
 
+			services.AddControllers();
+
+			services.AddDbContext<BankServicesContext>(options => options
+					  .UseNpgsql(_configuration.GetConnectionString("PostgreConnectionString"),
+					  x => x.UseNetTopologySuite())
+			   .UseLowerCaseNamingConvention());
+
 		}
 
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BankServicesContext context)
 		{
+			context.Database.Migrate();
 
 			app.UseSwagger();
 			app.UseSwaggerUI();
@@ -42,6 +53,7 @@
 			{
 				endpoints.MapControllers();
 			});
+
 		}
 	}
 }
