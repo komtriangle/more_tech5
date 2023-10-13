@@ -26,6 +26,8 @@ namespace LightFireMoreTech5.Data
 			builder.ApplyConfiguration(new OfficeConfiguration());
 			builder.ApplyConfiguration(new ServiceConfiguration());
 			builder.ApplyConfiguration(new OfficeScheduleConfiguration());
+			builder.ApplyConfiguration(new OfficeServiceServiceConfiguration());
+			builder.ApplyConfiguration(new AtmServiceServiceConfiguration());
 		}
 
 	}
