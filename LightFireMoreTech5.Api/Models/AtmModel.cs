@@ -1,14 +1,14 @@
 ﻿using LightFireMoreTech5.Data.Enums;
-using NetTopologySuite.Geometries;
 
-namespace LightFireMoreTech5.Data.Entities
+namespace LightFireMoreTech5.Models
 {
-	public class Atm
+	public class AtmModel
 	{
 		public long Id { get; set; }
-		public bool AllDay { get;set; }
-
+		public bool AllDay { get; set; }
 		public string Address { get; set; }
+		public double Latitude { get; set; }
+		public double Longitude { get; set; }
 		public ServiceCapability WheelChairCapability { get; set; }
 		public ServiceActivity WheelChairActivity { get; set; }
 
@@ -32,7 +32,5 @@ namespace LightFireMoreTech5.Data.Entities
 
 		public ServiceCapability SupportRubCapability { get; set; }
 		public ServiceActivity SupportRubActivity { get; set; }
-
-		public Point Location { get; set; }
 	}
 }

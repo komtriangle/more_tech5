@@ -1,4 +1,5 @@
 ﻿using LightFireMoreTech5.Data;
+using LightFireMoreTech5.Data.Enums;
 using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Models.Enums;
 using LightFireMoreTech5.Services.Interfaces;
@@ -22,6 +23,51 @@ namespace LightFireMoreTech5.Services
 			_logger = logger ?? 
 				throw new ArgumentNullException(nameof(logger));
 		}
+
+		public async Task<AtmModel?> GetAtmByIdAsync(long id, CancellationToken token)
+		{
+			try
+			{
+				var dbAtm = await _context.Atms.FindAsync(id, token);
+
+				if (dbAtm == null)
+				{
+					return null;
+				}
+
+				return new AtmModel()
+				{
+					Id = dbAtm.Id,
+					Address = dbAtm.Address,
+					Latitude = dbAtm.Location.Coordinate.X,
+					Longitude = dbAtm.Location.Coordinate.Y,
+					WheelChairCapability = dbAtm.WheelChairCapability,
+					WheelChairActivity = dbAtm.WheelChairActivity,
+					BlindCapability = dbAtm.BlindCapability,
+					BlindChairActivity = dbAtm.BlindChairActivity,
+					NfcBankCardsCapability = dbAtm.NfcBankCardsCapability,
+					NfcBankCardsActivity = dbAtm.NfcBankCardsActivity,
+					QrReadCapability = dbAtm.QrReadCapability,
+					QrReadActivity = dbAtm.QrReadActivity,
+					SupportUsdCapability = dbAtm.SupportUsdCapability,
+					SupportUsdActivity = dbAtm.SupportUsdActivity,
+					SupportChargeRubCapability = dbAtm.SupportChargeRubCapability,
+					SupportChargeRubActivity = dbAtm.SupportChargeRubActivity,
+					SupportEurCapability = dbAtm.SupportEurCapability,
+					SupportEurActivity = dbAtm.SupportEurActivity,
+					SupportRubCapability = dbAtm.SupportRubCapability,
+					SupportRubActivity = dbAtm.SupportRubActivity
+				};
+
+			}
+			catch(Exception ex)
+			{
+				string message = "Ошибка во время получения банкомата";
+				_logger.LogError(ex, message);
+				throw new Exception(message);
+			}
+		}
+
 		public async Task<OfficeModel?> GetOfficeByIdAsync(long id, CancellationToken token)
 		{
 			try
