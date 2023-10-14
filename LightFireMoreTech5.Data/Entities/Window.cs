@@ -8,5 +8,5 @@ public class Window
     public int BusyTime { get; set; }
     [ForeignKey("offices")] public long officeId { get; set; }
     public Office Office { get; set; }
-    public List<OfficeService> OfficeServices { get; set; }
+    public List<WindowService> WindowServices { get; set; }
 }

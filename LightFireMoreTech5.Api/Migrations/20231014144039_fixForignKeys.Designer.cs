@@ -3,6 +3,7 @@ using System;
 using LightFireMoreTech5.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LightFireMoreTech5.Migrations
 {
     [DbContext(typeof(BankServicesContext))]
-    partial class BankServicesContextModelSnapshot : ModelSnapshot
+    [Migration("20231014144039_fixForignKeys")]
+    partial class fixForignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,6 +37,7 @@ namespace LightFireMoreTech5.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("address");
 
@@ -213,10 +217,6 @@ namespace LightFireMoreTech5.Migrations
                         .HasColumnType("text")
                         .HasColumnName("salepointformat");
 
-                    b.Property<int>("WorkLoad")
-                        .HasColumnType("integer")
-                        .HasColumnName("workload");
-
                     b.HasKey("Id")
                         .HasName("pk_offices");
 
@@ -344,10 +344,6 @@ namespace LightFireMoreTech5.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<bool>("AvailableOnline")
-                        .HasColumnType("boolean")
-                        .HasColumnName("availableonline");
-
                     b.Property<int>("AverageWaitTime")
                         .HasColumnType("integer")
                         .HasColumnName("averagewaittime");
@@ -360,11 +356,6 @@ namespace LightFireMoreTech5.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("OnlineLink")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("onlinelink");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")

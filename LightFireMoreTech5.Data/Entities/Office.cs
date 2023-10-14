@@ -7,7 +7,7 @@ namespace LightFireMoreTech5.Data.Entities
 		public long Id { get; set; }
 		public string Name { get; set; }
 		public string Address { get; set; }
-		public string MetroStation { get;set; }
+		public string MetroStation { get; set; }
 		public bool? AllDay { get; set; }
 		public bool? Rko { get; set; }
 		public bool? HasRamp { get; set; }
@@ -19,8 +19,10 @@ namespace LightFireMoreTech5.Data.Entities
 
 		public long IndividualShceduleId { get; set; }
 		public long LegalEntityShceduleId { get; set; }
+		public int WorkLoad { get; set; }
 		public virtual OfficeSchedule IndividualSchedule { get; set; }
 		public virtual OfficeSchedule LegalEntitySchedule { get; set; }
 		public List<OfficeService> OfficeServices { get; set; }
+		public List<Window> Windows { get; set; }
 	}
 }
