@@ -2,6 +2,7 @@
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using LightFireMoreTech5.Api.Services.Interfaces;
+using LightFireMoreTech5.Data.Enums;
 
 namespace LightFireMoreTech5.Controllers
 {
@@ -18,11 +19,11 @@ namespace LightFireMoreTech5.Controllers
 		}
 
 		[HttpGet("Services")]
-		public async Task<ActionResult> GetServices(CancellationToken token)
+		public async Task<ActionResult> GetServices([FromQuery(Name = "Type")] ServiceType ServiceType, CancellationToken token)
 		{
 			try
 			{
-				var services = await _serviceService.GetServicesAsync(token);
+				var services = await _serviceService.GetServicesAsync(ServiceType, token);
 
 				if (services == null)
 				{
