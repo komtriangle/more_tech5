@@ -17,7 +17,14 @@ namespace LightFireMoreTech5.Controllers
 			_pointService = pointService;
 		}
 
+		/// <summary>
+		/// Получение информации об отделения банка по Id
+		/// </summary>
+		/// <param name="id">Id отделения</param>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		[HttpGet("Office")]
+		[ProducesResponseType(typeof(OfficeModel), StatusCodes.Status200OK)]
 		public async Task<ActionResult> GetOffice(long id, CancellationToken token)
 		{
 			try
@@ -51,7 +58,14 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Получение информации о банкомате по Id
+		/// </summary>
+		/// <param name="id">Id отделения</param>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		[HttpGet("Atm")]
+		[ProducesResponseType(typeof(AtmModel), StatusCodes.Status200OK)]
 		public async Task<ActionResult> GetAtm(long id, CancellationToken token)
 		{
 			try
@@ -71,7 +85,14 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Поиск отделений и банкоматов
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		[HttpPost("FindPoints")]
+		[ProducesResponseType(typeof(BankPoint[]), StatusCodes.Status200OK)]
 		public async Task<ActionResult> FindPoints([FromBody] FindPointModel request, CancellationToken token)
 		{
 			try
@@ -94,6 +115,33 @@ namespace LightFireMoreTech5.Controllers
 				await _pointService.UpdateOfficeWorkloadAsync(request, token);
 
 				return Ok();
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+
+		[HttpPost("SearchPoints")]
+		[ProducesResponseType(typeof(PointShotModel[]), StatusCodes.Status200OK)]
+		public async Task<IActionResult> SearchPoints([FromBody] SearchPointsRequest request, CancellationToken token)
+		{
+			if (string.IsNullOrWhiteSpace(request.Search))
+			{
+				return BadRequest("Необходимо заполнить поле Search");
+			}
+
+			if (request.Search.Length < 3)
+			{
+				return BadRequest("Минимальная строка поиска - 3 символа");
+
+			}
+
+			try
+			{
+				var points = await _pointService.SearchPointsAsync(request.Search, request.UserCoordinates, token);
+
+				return Ok(points);
 			}
 			catch (Exception ex)
 			{

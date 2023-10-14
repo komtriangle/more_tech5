@@ -8,15 +8,15 @@ using LightFireMoreTech5.Data.Enums;
 namespace LightFireMoreTech5.Api.Services;
 public class ServiceService : IServiceService
 {
-    private readonly BankServicesContext _context;
-    private readonly ILogger<ServiceService> _logger;
+	private readonly IDbContextFactory<BankServicesContext> _dbContextFactory;
+	private readonly ILogger<ServiceService> _logger;
 
     public ServiceService(
-        BankServicesContext context,
-        ILogger<ServiceService> logger)
+	   IDbContextFactory<BankServicesContext> dbContextFactory,
+		ILogger<ServiceService> logger)
     {
-        _context = context ??
-            throw new ArgumentNullException(nameof(context));
+		_dbContextFactory = dbContextFactory ??
+            throw new ArgumentNullException(nameof(dbContextFactory));
 
         _logger = logger ??
             throw new ArgumentNullException(nameof(logger));
@@ -25,21 +25,32 @@ public class ServiceService : IServiceService
     {
         try
         {
-            var services = await _context.Services.Where(x => x.Type == serviceType).ToListAsync();
-
-            if (services == null)
+			using (var context = await _dbContextFactory.CreateDbContextAsync())
             {
-                return null;
-            }
+				var services = await context.Services.Where(x => x.Type == serviceType).ToListAsync();
 
-            var ans = new List<ServiceModel>();
+				if (services == null)
+				{
+					return new List<ServiceModel>();
+				}
 
-            foreach (var item in services)
-            {
-                ans.Add(new ServiceModel { Id = item.Id, Name = item.Name, Category = item.Category });
-            }
+				var ans = new List<ServiceModel>();
 
-            return ans;
+				foreach (var item in services)
+				{
+					ans.Add(new ServiceModel
+					{
+						Id = item.Id,
+						Name = item.Name,
+						Category = item.Category,
+						IsAvailableOnline = item.AvailableOnline,
+						OnlineLink = item.OnlineLink,
+					});
+				}
+
+				return ans;
+			}
+			
 
         }
         catch (Exception ex)

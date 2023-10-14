@@ -56,16 +56,21 @@ namespace LightFireMoreTech5.Services
 						!graphHopperRouteResponse.Paths.Any())
 						throw new Exception("Не удалось распарсить ответ от graphHopper");
 
+					var path = graphHopperRouteResponse.Paths.FirstOrDefault()??
+						throw new Exception("Не удалось получить маршрут от graphHopper");
+
 					Models.Routes.Route result = new Models.Routes.Route()
 					{
 						Type = type,
-						Points = graphHopperRouteResponse.Paths.FirstOrDefault().Points.Coordinates
+						Points = path.Points.Coordinates
 							.Select(x => new RoutePoint()
 							{
 								Latitude = x[0],
 								Longitude = x[1]
 							})
-							.ToArray()
+							.ToArray(),
+						DistanceMetres = path.Distance,
+						TimeSeconds = path.Time / 1000
 					};
 
 					return result;
