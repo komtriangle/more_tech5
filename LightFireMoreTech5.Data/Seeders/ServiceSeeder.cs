@@ -7,10 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 namespace LightFireMoreTech5.Data.Seeders;
 public class ServiceSeeder
 {
-    public static void SeedServices(BankServicesContext context)
+    public static async Task SeedServices(BankServicesContext context)
     {
-        if (context.Services.Any())
-            return;
+        var services = await SeedServicesToDB(context);
+        await SeedOfficeServicesToDB(context, services);
+    }
+
+    private async static Task<List<Service>> SeedServicesToDB(BankServicesContext context)
+    {
+        var services = await context.Services.ToListAsync();
+        if (services.Any())
+            return services;
 
         context.Services.AddRange(
             new Service
@@ -121,6 +128,39 @@ public class ServiceSeeder
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
             });
-        context.SaveChanges();
+        await context.SaveChangesAsync();
+        return context.Services.ToList();
+    }
+
+    public static async Task SeedOfficeServicesToDB(BankServicesContext context, List<Service> services)
+    {
+        var officeServices = await context.OfficeServices.ToListAsync();
+        if (officeServices.Any())
+            return;
+
+        var serviceIds = services.Select(s => s.Id).ToList();
+        var officeIds = await context.Offices.Select(o => o.Id).ToListAsync();
+
+        var random = new Random();
+
+        foreach (var officeId in officeIds)
+        {
+            int numberOfServices = random.Next(1, services.Count + 1);
+
+            var randomServiceIndices = Enumerable.Range(0, services.Count).OrderBy(x => random.Next()).Take(numberOfServices);
+
+            foreach (var serviceIndex in randomServiceIndices)
+            {
+                var officeService = new OfficeService
+                {
+                    officeId = officeId,
+                    serviceId = services[serviceIndex].Id
+                };
+                officeServices.Add(officeService);
+            }
+        }
+
+        context.OfficeServices.AddRange(officeServices);
+        await context.SaveChangesAsync();
     }
 }
