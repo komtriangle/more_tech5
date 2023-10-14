@@ -15,5 +15,6 @@ namespace LightFireMoreTech5.Services.Interfaces
 		Task UpdateOfficeWorkloadAsync(UpdateOfficeWorkloadRequest request, CancellationToken token);
 		Task<int> GetOfficeServiceWorkload(long officeId, long serviceId, CancellationToken token);
 		Task<PointShotModel[]> SearchPointsAsync(string search, RoutePoint? userCoordinates, CancellationToken token);
+		Task TakeTicket(TakeTicketRequest request, CancellationToken token);
 	}
 }
