@@ -34,7 +34,6 @@ namespace LightFireMoreTech5.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("address");
 
@@ -348,14 +347,13 @@ namespace LightFireMoreTech5.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("AverageWaitTime")
-                        .HasColumnType("integer")
-                        .HasColumnName("averagewaittime");
-
                     b.Property<bool>("AvailableOnline")
                         .HasColumnType("boolean")
                         .HasColumnName("availableonline");
 
+                    b.Property<int>("AverageWaitTime")
+                        .HasColumnType("integer")
+                        .HasColumnName("averagewaittime");
 
                     b.Property<int>("Category")
                         .HasColumnType("integer")

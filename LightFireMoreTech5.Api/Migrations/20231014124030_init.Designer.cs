@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LightFireMoreTech5.Migrations
 {
     [DbContext(typeof(BankServicesContext))]
-    [Migration("20231014110451_serviceChange")]
-    partial class serviceChange
+    [Migration("20231014124030_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,7 +37,6 @@ namespace LightFireMoreTech5.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("address");
 
@@ -135,13 +134,24 @@ namespace LightFireMoreTech5.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("serviceid");
 
+                    b.Property<long?>("AtmId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("atmid");
+
                     b.HasKey("atmId", "serviceId")
                         .HasName("pk_atm_service");
+
+                    b.HasIndex("AtmId")
+                        .HasDatabaseName("ix_atm_service_atmid");
 
                     b.HasIndex("serviceId")
                         .HasDatabaseName("ix_atm_service_serviceid");
 
-                    b.ToTable("atm_service", (string)null);
+                    b.ToTable("atm_service", null, t =>
+                        {
+                            t.Property("AtmId")
+                                .HasColumnName("atmid1");
+                        });
                 });
 
             modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Office", b =>
@@ -304,13 +314,31 @@ namespace LightFireMoreTech5.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("serviceid");
 
+                    b.Property<long?>("OfficeId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("officeid");
+
+                    b.Property<long?>("WindowId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("windowid");
+
                     b.HasKey("officeId", "serviceId")
                         .HasName("pk_office_service");
+
+                    b.HasIndex("OfficeId")
+                        .HasDatabaseName("ix_office_service_officeid");
+
+                    b.HasIndex("WindowId")
+                        .HasDatabaseName("ix_office_service_windowid");
 
                     b.HasIndex("serviceId")
                         .HasDatabaseName("ix_office_service_serviceid");
 
-                    b.ToTable("office_service", (string)null);
+                    b.ToTable("office_service", null, t =>
+                        {
+                            t.Property("OfficeId")
+                                .HasColumnName("officeid1");
+                        });
                 });
 
             modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Service", b =>
@@ -325,6 +353,10 @@ namespace LightFireMoreTech5.Migrations
                     b.Property<bool>("AvailableOnline")
                         .HasColumnType("boolean")
                         .HasColumnName("availableonline");
+
+                    b.Property<int>("AverageWaitTime")
+                        .HasColumnType("integer")
+                        .HasColumnName("averagewaittime");
 
                     b.Property<int>("Category")
                         .HasColumnType("integer")
@@ -350,14 +382,64 @@ namespace LightFireMoreTech5.Migrations
                     b.ToTable("service", (string)null);
                 });
 
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Window", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("BusyTime")
+                        .HasColumnType("integer")
+                        .HasColumnName("busytime");
+
+                    b.Property<long>("officeId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("officeid");
+
+                    b.HasKey("Id")
+                        .HasName("pk_window");
+
+                    b.HasIndex("officeId")
+                        .HasDatabaseName("ix_window_officeid");
+
+                    b.ToTable("window", (string)null);
+                });
+
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.WindowService", b =>
+                {
+                    b.Property<long>("windowId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("windowid");
+
+                    b.Property<long>("serviceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("serviceid");
+
+                    b.HasKey("windowId", "serviceId")
+                        .HasName("pk_window_service");
+
+                    b.HasIndex("serviceId")
+                        .HasDatabaseName("ix_window_service_serviceid");
+
+                    b.ToTable("window_service", (string)null);
+                });
+
             modelBuilder.Entity("LightFireMoreTech5.Data.Entities.AtmService", b =>
                 {
+                    b.HasOne("LightFireMoreTech5.Data.Entities.Atm", null)
+                        .WithMany("AtmServices")
+                        .HasForeignKey("AtmId")
+                        .HasConstraintName("fk_atm_service_atms_atmid");
+
                     b.HasOne("LightFireMoreTech5.Data.Entities.Atm", "Atm")
                         .WithMany()
                         .HasForeignKey("atmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_atm_service_atms_atmid");
+                        .HasConstraintName("fk_atm_service_atms_atmid1");
 
                     b.HasOne("LightFireMoreTech5.Data.Entities.Service", "Service")
                         .WithMany()
@@ -394,12 +476,22 @@ namespace LightFireMoreTech5.Migrations
 
             modelBuilder.Entity("LightFireMoreTech5.Data.Entities.OfficeService", b =>
                 {
+                    b.HasOne("LightFireMoreTech5.Data.Entities.Office", null)
+                        .WithMany("OfficeServices")
+                        .HasForeignKey("OfficeId")
+                        .HasConstraintName("fk_office_service_offices_officeid");
+
+                    b.HasOne("LightFireMoreTech5.Data.Entities.Window", null)
+                        .WithMany("OfficeServices")
+                        .HasForeignKey("WindowId")
+                        .HasConstraintName("fk_office_service_windows_windowid");
+
                     b.HasOne("LightFireMoreTech5.Data.Entities.Office", "Office")
                         .WithMany()
                         .HasForeignKey("officeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_office_service_offices_officeid");
+                        .HasConstraintName("fk_office_service_offices_officeid1");
 
                     b.HasOne("LightFireMoreTech5.Data.Entities.Service", "Service")
                         .WithMany()
@@ -413,11 +505,59 @@ namespace LightFireMoreTech5.Migrations
                     b.Navigation("Service");
                 });
 
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Window", b =>
+                {
+                    b.HasOne("LightFireMoreTech5.Data.Entities.Office", "Office")
+                        .WithMany()
+                        .HasForeignKey("officeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_window_offices_officeid");
+
+                    b.Navigation("Office");
+                });
+
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.WindowService", b =>
+                {
+                    b.HasOne("LightFireMoreTech5.Data.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("serviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_window_service_service_serviceid");
+
+                    b.HasOne("LightFireMoreTech5.Data.Entities.Window", "Window")
+                        .WithMany()
+                        .HasForeignKey("windowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_window_service_window_windowid");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Window");
+                });
+
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Atm", b =>
+                {
+                    b.Navigation("AtmServices");
+                });
+
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Office", b =>
+                {
+                    b.Navigation("OfficeServices");
+                });
+
             modelBuilder.Entity("LightFireMoreTech5.Data.Entities.OfficeSchedule", b =>
                 {
                     b.Navigation("IndividualOffices");
 
                     b.Navigation("LegalEntitiesOffices");
+                });
+
+            modelBuilder.Entity("LightFireMoreTech5.Data.Entities.Window", b =>
+                {
+                    b.Navigation("OfficeServices");
                 });
 #pragma warning restore 612, 618
         }
