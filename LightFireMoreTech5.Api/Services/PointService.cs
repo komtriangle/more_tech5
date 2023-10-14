@@ -152,7 +152,9 @@ namespace LightFireMoreTech5.Services
 
 				var dbModels = await _context.Offices
 					.AsNoTracking()
-					.Where(x => x.Location.Distance(point) <= radius && (serviceIds.IsNullOrEmpty() || serviceIds.Contains(x.Id)))
+					.Include(x => x.OfficeServices)
+					.Where(x => x.Location.Distance(point) <= radius)
+					.Where(x => serviceIds.IsNullOrEmpty() || x.OfficeServices.Any(y => serviceIds.Contains(y.serviceId)))
 					.ToArrayAsync(token);
 
 				BankPoint[] result = dbModels
