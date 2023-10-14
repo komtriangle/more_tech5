@@ -17,6 +17,7 @@ namespace LightFireMoreTech5.Models
 		public bool? MyOffice { get; set; }
 		public string OfficeType { get; set; }
 		public string SalePointFormat { get; set; }
+		public int WorkLoad { get; set; }
 		public virtual OfficeScheduleModel IndividualSchedule { get; set; }
 		public virtual OfficeScheduleModel LegalEntitySchedule { get; set; }
 	}

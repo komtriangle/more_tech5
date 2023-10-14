@@ -10,5 +10,6 @@ namespace LightFireMoreTech5.Services.Interfaces
 		Task<AtmModel?> GetAtmByIdAsync(long id, CancellationToken token);
 		Task<BankPoint[]> GetPointsInRadiusAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token);
 		Task UpdateOfficeWorkloadAsync(UpdateOfficeWorkloadRequest request, CancellationToken token);
+		Task<int> GetOfficeServiceWorkload(long officeId, long serviceId, CancellationToken token);
 	}
 }
