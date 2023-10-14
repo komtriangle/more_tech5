@@ -1,4 +1,5 @@
-﻿using LightFireMoreTech5.Models;
+﻿using LightFireMoreTech5.Api.Models.Requests;
+using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,6 +93,21 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
+		[HttpPost("Office/Workload")]
+		public async Task<ActionResult> UpdateOfficeWorkload([FromBody] UpdateOfficeWorkloadRequest request, CancellationToken token)
+		{
+			try
+			{
+				await _pointService.UpdateOfficeWorkloadAsync(request, token);
+
+				return Ok();
+
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+
 		[HttpPost("SearchPoints")]
 		[ProducesResponseType(typeof(PointShotModel[]), StatusCodes.Status200OK)]
 		public async Task<IActionResult> SearchPoints([FromBody] SearchPointsRequest request, CancellationToken token)
@@ -113,10 +129,5 @@ namespace LightFireMoreTech5.Controllers
 
 				return Ok(points);
 			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
-		}
 	}
 }
