@@ -16,7 +16,14 @@ namespace LightFireMoreTech5.Controllers
 			_pointService = pointService;
 		}
 
+		/// <summary>
+		/// Получение информации об отделения банка по Id
+		/// </summary>
+		/// <param name="id">Id отделения</param>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		[HttpGet("Office")]
+		[ProducesResponseType(typeof(OfficeModel), StatusCodes.Status200OK)]
 		public async Task<ActionResult> GetOffice(long id, CancellationToken token)
 		{
 			try
@@ -36,6 +43,12 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Получение информации о банкомате по Id
+		/// </summary>
+		/// <param name="id">Id отделения</param>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		[HttpGet("Atm")]
 		public async Task<ActionResult> GetAtm(long id, CancellationToken token)
 		{
@@ -56,6 +69,12 @@ namespace LightFireMoreTech5.Controllers
 			}
 		}
 
+		/// <summary>
+		/// Поиск отделений и банкоматов
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="token"></param>
+		/// <returns></returns>
 		[HttpPost("FindPoints")]
 		public async Task<ActionResult> FindPoints([FromBody] FindPointModel request, CancellationToken token)
 		{

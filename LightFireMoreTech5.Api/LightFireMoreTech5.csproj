@@ -29,6 +29,11 @@
     </PackageReference>
   </ItemGroup>
 
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\LightFireMoreTech5.Data\LightFireMoreTech5.Data.csproj" />
   </ItemGroup>
