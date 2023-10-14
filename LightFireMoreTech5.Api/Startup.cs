@@ -87,7 +87,7 @@ namespace LightFileMoreTech5
 		{
 			context.Database.Migrate();
 
-			ServiceSeeder.SeedServices(context);
+			//ServiceSeeder.SeedServices(context);
 
 
 			app.UseSwagger();
