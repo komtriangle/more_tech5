@@ -69,6 +69,7 @@ namespace ParseSourceData
 
 		static void Main(string[] args)
 		{
+			FillOffices();
 			FillAtm();
 		}
 
