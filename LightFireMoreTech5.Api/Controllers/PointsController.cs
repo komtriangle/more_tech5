@@ -83,7 +83,8 @@ namespace LightFireMoreTech5.Controllers
 		{
 			try
 			{
-				var points = await _pointService.GetPointsInRadiusAsync(request.Latitude, request.Longitude, request.Radius, request.ServiceIds, token);
+				var points = await _pointService.GetPointsInRadiusAsync(request.Latitude, request.Longitude, request.Radius, 
+					request.Parameters?.Type, request.Parameters?.SericeIds ?? new List<long>(), token);
 
 				return Ok(points);
 			}
