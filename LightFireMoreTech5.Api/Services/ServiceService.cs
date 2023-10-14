@@ -21,11 +21,11 @@ public class ServiceService : IServiceService
         _logger = logger ??
             throw new ArgumentNullException(nameof(logger));
     }
-    public async Task<List<ServiceModel>> GetServicesAsync(CancellationToken token)
+    public async Task<List<ServiceModel>> GetServicesAsync(ServiceType serviceType, CancellationToken token)
     {
         try
         {
-            var services = await _context.Services.ToListAsync();
+            var services = await _context.Services.Where(x => x.Type == serviceType).ToListAsync();
 
             if (services == null)
             {
@@ -36,7 +36,7 @@ public class ServiceService : IServiceService
 
             foreach (var item in services)
             {
-                ans.Add(new ServiceModel { Id = item.Id, Name = item.Name, Type = item.Type });
+                ans.Add(new ServiceModel { Id = item.Id, Name = item.Name, Category = item.Category });
             }
 
             return ans;

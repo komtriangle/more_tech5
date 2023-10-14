@@ -1,5 +1,6 @@
 ﻿using LightFireMoreTech5.Data.Entities;
 using LightFireMoreTech5.Data.EntitiesConfiguration;
+using LightFireMoreTech5.Data.Seeders;
 using Microsoft.EntityFrameworkCore;
 
 namespace LightFireMoreTech5.Data

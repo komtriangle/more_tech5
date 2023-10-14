@@ -6,6 +6,7 @@ using LightFireMoreTech5.Services;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using LightFireMoreTech5.Data.Seeders;
 
 namespace LightFileMoreTech5
 {
@@ -58,6 +59,7 @@ namespace LightFileMoreTech5
 			services.AddTransient<IPointService, PointService>();
 			services.AddTransient<IServiceService, ServiceService>();
 			services.AddTransient<IPathService, PathService>();
+			services.AddTransient<ServiceSeeder>();
 
 			services.AddDbContext<BankServicesContext>(options => options
 					  .UseNpgsql(_configuration.GetConnectionString("PostgreConnectionString"),
@@ -69,7 +71,11 @@ namespace LightFileMoreTech5
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BankServicesContext context)
 		{
 			context.Database.Migrate();
-			//context.SeedServices();
+
+			var scopedFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+
+			ServiceSeeder.SeedServices(context);
+
 
 			app.UseSwagger();
 			app.UseSwaggerUI();
