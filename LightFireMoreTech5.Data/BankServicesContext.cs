@@ -13,6 +13,8 @@ namespace LightFireMoreTech5.Data
 		public DbSet<AtmService> AtmServices { get; set; }
 		public DbSet<OfficeService> OfficeServices { get; set; }
 		public DbSet<OfficeSchedule> OfficeSchedules { get; set; }
+		public DbSet<Window> Windows { get; set; }
+		public DbSet<WindowService> WindowServices { get; set; }
 
 		public BankServicesContext(DbContextOptions<BankServicesContext> options)
 		: base(options)
@@ -29,7 +31,8 @@ namespace LightFireMoreTech5.Data
 			builder.ApplyConfiguration(new OfficeScheduleConfiguration());
 			builder.ApplyConfiguration(new OfficeServiceServiceConfiguration());
 			builder.ApplyConfiguration(new AtmServiceServiceConfiguration());
+			builder.ApplyConfiguration(new WindowConfiguration());
+			builder.ApplyConfiguration(new WindowServiceConfiguration());
 		}
-
 	}
 }
