@@ -89,7 +89,6 @@ namespace LightFireMoreTech5.Services
 					Latitude = dbOffice.Location.Coordinate.X,
 					Longitude = dbOffice.Location.Coordinate.Y,
 					Name = dbOffice.Name,
-					AllDay = dbOffice.AllDay,
 					Address = dbOffice.Address,
 					HasRamp = dbOffice.HasRamp,
 					Kep = dbOffice.Kep,

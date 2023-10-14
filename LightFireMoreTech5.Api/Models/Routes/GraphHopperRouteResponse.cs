@@ -7,6 +7,8 @@
 
 	public class ResponsePath
 	{
+		public double Distance { get;set; }
+		public int Time { get; set; }
 		public ResponsePoints Points { get; set; }
 	}
 
