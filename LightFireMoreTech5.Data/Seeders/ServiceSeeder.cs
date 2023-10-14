@@ -19,43 +19,47 @@ public class ServiceSeeder
     {
         var services = await context.Services.ToListAsync();
         if (services.Any())
-            return services;
+        {
+            context.Services.RemoveRange(services);
+            await context.SaveChangesAsync();
+        }
+
         var random = new Random();
 
         context.Services.AddRange(
-			new Service
-			{
-				Name = "Открытие ИИС",
-				Category = ServiceCategory.Investments,
+            new Service
+            {
+                Name = "Открытие ИИС",
+                Category = ServiceCategory.Investments,
                 AvailableOnline = true,
                 OnlineLink = @"https://www.vtb.ru/personal/investicii/iis/",
-				Type = ServiceType.Physical,
-			},
+                Type = ServiceType.Physical,
+            },
             new Service
             {
                 Name = "Установка приложения на iPhone",
                 Category = ServiceCategory.NonFinance,
                 Type = ServiceType.Both,
                 AverageWaitTime = random.Next(1, 10)
-                  },
-		new Service
-			{
-                Name = "ВТБ-вклад в рублях",
+            },
+        new Service
+        {
+            Name = "ВТБ-вклад в рублях",
+            Category = ServiceCategory.Investments,
+            AvailableOnline = true,
+            OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/vtb-vklad-r/",
+            Type = ServiceType.Physical,
+            AverageWaitTime = random.Next(1, 10)
+        },
+            new Service
+            {
+                Name = "ВТБ-вклад в юанях",
                 Category = ServiceCategory.Investments,
                 AvailableOnline = true,
-                OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/vtb-vklad-r/",
+                OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/vtb-vklad-y/",
                 Type = ServiceType.Physical,
                 AverageWaitTime = random.Next(1, 10)
-			},
-			new Service
-			{
-				Name = "ВТБ-вклад в юанях",
-				Category = ServiceCategory.Investments,
-				AvailableOnline = true,
-				OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/vtb-vklad-y/",
-				Type = ServiceType.Physical,
-                AverageWaitTime = random.Next(1, 10)
-			},
+            },
             new Service
             {
                 Name = "Накопительный счет \"Копилка\"",
@@ -64,16 +68,16 @@ public class ServiceSeeder
                 OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/nakopitelny-schet-kopilka/",
                 Type = ServiceType.Physical,
                 AverageWaitTime = random.Next(1, 10)
-			},
+            },
             new Service
             {
                 Name = "Вклад \"Новое время\"",
-				Category = ServiceCategory.Investments,
-				AvailableOnline = true,
-				OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/novoe-vremya/",
-				Type = ServiceType.Physical,
+                Category = ServiceCategory.Investments,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/novoe-vremya/",
+                Type = ServiceType.Physical,
                 AverageWaitTime = random.Next(1, 10)
-			},
+            },
             new Service
             {
                 Name = "Рассчетный счет для вашего бизнеса",
@@ -82,7 +86,8 @@ public class ServiceSeeder
                 Type = ServiceType.Legal,
                 AverageWaitTime = random.Next(1, 10)
             },
-            new Service{
+            new Service
+            {
                 Name = "Универсальная карта для бизнеса",
                 Category = ServiceCategory.Cards,
                 AvailableOnline = false,
@@ -106,7 +111,7 @@ public class ServiceSeeder
                 OnlineLink = @"https://www.vtb.ru/malyj-biznes/otkryt-schet/otkryt-schet-ip/",
                 Type = ServiceType.Legal,
                 AverageWaitTime = random.Next(1, 10)
-			},
+            },
             new Service
             {
                 Name = "Рассчетный счет для ООО",
@@ -115,8 +120,8 @@ public class ServiceSeeder
                 OnlineLink = @"https://www.vtb.ru/malyj-biznes/otkryt-schet/otkryt-schet-ooo/",
                 Type = ServiceType.Legal,
                 AverageWaitTime = random.Next(1, 10)
-			},
-			new Service
+            },
+            new Service
             {
                 Name = "КАСКО (подбор и оформление полиса)",
                 Category = ServiceCategory.NonFinance,
@@ -130,7 +135,7 @@ public class ServiceSeeder
                 AverageWaitTime = random.Next(1, 10),
                 AvailableOnline = true,
                 OnlineLink = @"https://www.vtb.ru/personal/drugie-uslugi/strahovye-i-servisnye-produkty/osago/",
-				        Type = ServiceType.Both,
+                Type = ServiceType.Both,
 
             },
             new Service
@@ -247,7 +252,10 @@ public class ServiceSeeder
 		var officeServices = await context.OfficeServices.ToListAsync();
 
         if (officeServices.Any())
-            return;
+        {
+            context.OfficeServices.RemoveRange(officeServices);
+            await context.SaveChangesAsync();
+        }
 
         var serviceIds = services.Select(s => s.Id).ToList();
         var officeIds = await context.Offices.Select(o => o.Id).ToListAsync();
@@ -278,7 +286,10 @@ public class ServiceSeeder
     {
         var windows = await context.Windows.ToListAsync();
         if (windows.Any())
-            return;
+        {
+            context.Windows.RemoveRange(windows);
+            await context.SaveChangesAsync();
+        }
 
         var officeIds = await context.Offices.Select(o => o.Id).ToListAsync();
 
@@ -307,7 +318,10 @@ public class ServiceSeeder
     {
         var WindowServices = await context.WindowServices.ToListAsync();
         if (WindowServices.Any())
-            return;
+        {
+            context.WindowServices.RemoveRange(WindowServices);
+            await context.SaveChangesAsync();
+        }
 
         var serviceIds = services.Select(s => s.Id).ToList();
         var windowIds = await context.Windows.Select(o => o.Id).ToListAsync();
