@@ -1,6 +1,6 @@
 version: '3.1'
 networks:
-  backend:
+  more-tech:
     driver: bridge
 services:
    db:
@@ -13,7 +13,7 @@ services:
     ports:
       - 5432:5432
     networks:
-      -  backend
+      -  more-tech
       
    hack-api:
     build:
@@ -25,9 +25,8 @@ services:
     ports:
       - "5000:5000"
     networks:
-      -  backend
-    depends_on:
-      - db
+      -  more-tech
+
     restart: always
     healthcheck:
       test:
@@ -38,6 +37,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    
+   hack-front:
+    build:
+      context: ../../vtb-more-tech-front/app
+      dockerfile: LightFireMoreTech5Dockerfile
+    ports:
+      - "3000:8080"
+    networks:
+      -  more-tech
+ 
 
    #hack-redis:
    # container_name: my-hack-redis
