@@ -43,6 +43,7 @@ namespace LightFireMoreTech5.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
+
 		[HttpGet("Office/{officeId}/ServiceWorkload/{serviceId}")]
 		public async Task<ActionResult> GetOfficeServiceWorkload(long officeId, long serviceId, CancellationToken token)
 		{
@@ -51,6 +52,20 @@ namespace LightFireMoreTech5.Controllers
 				var time = await _pointService.GetOfficeServiceWorkload(officeId, serviceId, token);
 
 				return Ok(time);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+
+		[HttpPost("Office/Ticket")]
+		public async Task<ActionResult> TakeTicket([FromBody] TakeTicketRequest request, CancellationToken token)
+		{
+			try
+			{
+				await _pointService.TakeTicket(request, token);
+				return Ok();
 			}
 			catch (Exception ex)
 			{

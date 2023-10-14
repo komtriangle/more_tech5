@@ -1,3 +1,5 @@
+using LightFireMoreTech5.Api.Models.Enums;
+using LightFireMoreTech5.Api.Models.Enums;
 using LightFireMoreTech5.Api.Models.Requests;
 using LightFireMoreTech5.Data;
 using LightFireMoreTech5.Data.Entities;
@@ -70,10 +72,44 @@ namespace LightFireMoreTech5.Services
 					{
 						return null;
 					}
+					return new OfficeModel()
+					{
+						Id = id,
+						Latitude = dbOffice.Location.Coordinate.X,
+						Longitude = dbOffice.Location.Coordinate.Y,
+						Name = dbOffice.Name,
+						//AllDay = dbOffice.AllDay,
+						Address = dbOffice.Address,
+						HasRamp = dbOffice.HasRamp,
+						Kep = dbOffice.Kep,
+						MetroStation = dbOffice.MetroStation,
+						MyOffice = dbOffice.MyOffice,
+						OfficeType = dbOffice.OfficeType,
+						Rko = dbOffice.Rko,
+						SalePointFormat = dbOffice.SalePointFormat,
+						WorkLoad = dbOffice.WorkLoad,
+						IndividualSchedule = new OfficeScheduleModel()
+						{
+							MondayStart = dbOffice.IndividualSchedule.MondayStart,
+							MondayEnd = dbOffice.IndividualSchedule.MondayEnd,
+							TuesdayStart = dbOffice.IndividualSchedule.TuesdayStart,
+							TuesdayEnd = dbOffice.IndividualSchedule.TuesdayEnd,
+							WednesdayStart = dbOffice.IndividualSchedule.WednesdayStart,
+							WednesdayEnd = dbOffice.IndividualSchedule.WednesdayEnd,
+							ThursdayStart = dbOffice.IndividualSchedule.ThursdayStart,
+							ThursdayEnd = dbOffice.IndividualSchedule.ThursdayEnd,
+							FridayStart = dbOffice.IndividualSchedule.FridayStart,
+							FridayEnd = dbOffice.IndividualSchedule.FridayEnd,
+							SaturdayStart = dbOffice.IndividualSchedule.SaturdayStart,
+							SaturdayEnd = dbOffice.IndividualSchedule.SaturdayEnd,
+							SundayStart = dbOffice.IndividualSchedule.SundayStart,
+							SundayEnd = dbOffice.IndividualSchedule.SundayEnd,
+						},
+						LegalEntitySchedule = new OfficeScheduleModel()
 
+					};
 					return new OfficeModel(dbOffice);
 				}
-
 			}
 			catch (Exception ex)
 			{
@@ -86,15 +122,14 @@ namespace LightFireMoreTech5.Services
 		{
 			try
 			{
-				using(var context = await _dbContextFactory.CreateDbContextAsync())
-				{
-					// получаем все окна отделения для нашей операции
-					var office = await context.Offices
-					.Where(x => x.Id == officeId)
-					.Include(x => x.Windows)
-						.ThenInclude(w => w.WindowServices)
-							.ThenInclude(ws => ws.Service)
-					.FirstOrDefaultAsync();
+				using var context = await _dbContextFactory.CreateDbContextAsync();
+				// получаем все окна отделения для нашей операции
+				var office = await context.Offices
+				.Where(x => x.Id == officeId)
+				.Include(x => x.Windows)
+					.ThenInclude(w => w.WindowServices)
+						.ThenInclude(ws => ws.Service)
+				.FirstOrDefaultAsync();
 
 					if (office == null)
 						return -1;
@@ -105,7 +140,6 @@ namespace LightFireMoreTech5.Services
 					var averageTime = (int)Math.Round(avaliableWindows.Average(w => w.BusyTime));
 
 					return averageTime;
-				}
 			}
 			catch (Exception ex)
 			{
@@ -235,10 +269,76 @@ namespace LightFireMoreTech5.Services
 							};
 					}
 				}
-
-				return atms;
+			}
+			catch (Exception ex)
+			{
+				string message = "Ошибка во время получения точек";
+				_logger.LogError(ex, message);
+				throw new Exception(message);
 			}
 
+		}
+
+		public async Task TakeTicket(TakeTicketRequest request, CancellationToken token)
+		{
+			try
+			{
+				UpdateOfficeWorkloadRequest newRequest;
+				switch (request.TakeTicketType)
+				{
+					case TakeTicketType.TakeAt:
+						if (request.Time < DateTime.Now)
+							throw new Exception("Неверное время взятия билета");
+
+						var deltaTime = request.Time - DateTime.Now;
+						await Task.Delay(deltaTime, token);
+						break;
+
+					case TakeTicketType.LeaveAt:
+						if (request.Time < DateTime.Now)
+							throw new Exception("Неверное время отправки");
+
+						var wayTime = TimeSpan.FromMinutes(request.WayTime.Ticks);
+						var arriveTime = DateTime.Now.Add(wayTime);
+
+						await DelayTicketSending(request, token, arriveTime);
+						break;
+
+					case TakeTicketType.ComeAt:
+						await DelayTicketSending(request, token, request.Time);
+						break;
+				}
+				newRequest = new UpdateOfficeWorkloadRequest() { OfficeId = request.OfficeId, ServiceId = request.ServiceId, IsCompleted = false };
+				await UpdateOfficeWorkloadAsync(newRequest, token);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex.Message);
+				throw new Exception(ex.Message);
+			}
+		}
+
+		private async Task DelayTicketSending(TakeTicketRequest request, CancellationToken token, DateTime arriveTime)
+		{
+			var waitingTime = await GetOfficeServiceWorkload(request.OfficeId, request.ServiceId, token);
+			var queueTime = DateTime.Now.AddMinutes(waitingTime);
+
+			var maxAttempts = 10;
+			var attempt = 0;
+
+			while (queueTime > arriveTime && attempt < maxAttempts)
+			{
+				var deltaTime = arriveTime - queueTime;
+				if (deltaTime > TimeSpan.Zero)
+				{
+					await Task.Delay(deltaTime, token);
+				}
+
+				waitingTime = await GetOfficeServiceWorkload(request.OfficeId, request.ServiceId, token);
+				queueTime = DateTime.Now.AddMinutes(waitingTime);
+
+				attempt++;
+			}
 		}
 
 		public async Task UpdateOfficeWorkloadAsync(UpdateOfficeWorkloadRequest request, CancellationToken token)
