@@ -1,4 +1,6 @@
-﻿using LightFireMoreTech5.Data.Enums;
+﻿using LightFireMoreTech5.Data.Entities;
+using LightFireMoreTech5.Data.Enums;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LightFireMoreTech5.Models
 {
@@ -101,5 +103,30 @@ namespace LightFireMoreTech5.Models
 		/// Работает ли сейчас поддержка валюты RUB
 		/// </summary>
 		public ServiceActivity SupportRubActivity { get; set; }
+
+		public AtmModel() { }
+		public AtmModel(Atm dbAtm)
+		{
+			Id = dbAtm.Id;
+			Address = dbAtm.Address;
+			Latitude = dbAtm.Location.Coordinate.X;
+			Longitude = dbAtm.Location.Coordinate.Y;
+			WheelChairCapability = dbAtm.WheelChairCapability;
+			WheelChairActivity = dbAtm.WheelChairActivity;
+			BlindCapability = dbAtm.BlindCapability;
+			BlindChairActivity = dbAtm.BlindChairActivity;
+			NfcBankCardsCapability = dbAtm.NfcBankCardsCapability;
+			NfcBankCardsActivity = dbAtm.NfcBankCardsActivity;
+			QrReadCapability = dbAtm.QrReadCapability;
+			QrReadActivity = dbAtm.QrReadActivity;
+			SupportUsdCapability = dbAtm.SupportUsdCapability;
+			SupportUsdActivity = dbAtm.SupportUsdActivity;
+			SupportChargeRubCapability = dbAtm.SupportChargeRubCapability;
+			SupportChargeRubActivity = dbAtm.SupportChargeRubActivity;
+			SupportEurCapability = dbAtm.SupportEurCapability;
+			SupportEurActivity = dbAtm.SupportEurActivity;
+			SupportRubCapability = dbAtm.SupportRubCapability;
+			SupportRubActivity = dbAtm.SupportRubActivity;
+		}
 	}
 }

@@ -42,29 +42,8 @@ namespace LightFireMoreTech5.Services
 						return null;
 					}
 
-					return new AtmModel()
-					{
-						Id = dbAtm.Id,
-						Address = dbAtm.Address,
-						Latitude = dbAtm.Location.Coordinate.X,
-						Longitude = dbAtm.Location.Coordinate.Y,
-						WheelChairCapability = dbAtm.WheelChairCapability,
-						WheelChairActivity = dbAtm.WheelChairActivity,
-						BlindCapability = dbAtm.BlindCapability,
-						BlindChairActivity = dbAtm.BlindChairActivity,
-						NfcBankCardsCapability = dbAtm.NfcBankCardsCapability,
-						NfcBankCardsActivity = dbAtm.NfcBankCardsActivity,
-						QrReadCapability = dbAtm.QrReadCapability,
-						QrReadActivity = dbAtm.QrReadActivity,
-						SupportUsdCapability = dbAtm.SupportUsdCapability,
-						SupportUsdActivity = dbAtm.SupportUsdActivity,
-						SupportChargeRubCapability = dbAtm.SupportChargeRubCapability,
-						SupportChargeRubActivity = dbAtm.SupportChargeRubActivity,
-						SupportEurCapability = dbAtm.SupportEurCapability,
-						SupportEurActivity = dbAtm.SupportEurActivity,
-						SupportRubCapability = dbAtm.SupportRubCapability,
-						SupportRubActivity = dbAtm.SupportRubActivity
-					};
+					return new AtmModel(dbAtm);
+					
 				}
 
 			}
@@ -92,55 +71,7 @@ namespace LightFireMoreTech5.Services
 						return null;
 					}
 
-					return new OfficeModel()
-					{
-						Id = id,
-						Latitude = dbOffice.Location.Coordinate.X,
-						Longitude = dbOffice.Location.Coordinate.Y,
-						Name = dbOffice.Name,
-						Address = dbOffice.Address,
-						HasRamp = dbOffice.HasRamp,
-						Kep = dbOffice.Kep,
-						MetroStation = dbOffice.MetroStation,
-						MyOffice = dbOffice.MyOffice,
-						OfficeType = dbOffice.OfficeType,
-						Rko = dbOffice.Rko,
-						SalePointFormat = dbOffice.SalePointFormat,
-						IndividualSchedule = new OfficeScheduleModel()
-						{
-							MondayStart = dbOffice.IndividualSchedule.MondayStart,
-							MondayEnd = dbOffice.IndividualSchedule.MondayEnd,
-							TuesdayStart = dbOffice.IndividualSchedule.TuesdayStart,
-							TuesdayEnd = dbOffice.IndividualSchedule.TuesdayEnd,
-							WednesdayStart = dbOffice.IndividualSchedule.WednesdayStart,
-							WednesdayEnd = dbOffice.IndividualSchedule.WednesdayEnd,
-							ThursdayStart = dbOffice.IndividualSchedule.ThursdayStart,
-							ThursdayEnd = dbOffice.IndividualSchedule.ThursdayEnd,
-							FridayStart = dbOffice.IndividualSchedule.FridayStart,
-							FridayEnd = dbOffice.IndividualSchedule.FridayEnd,
-							SaturdayStart = dbOffice.IndividualSchedule.SaturdayStart,
-							SaturdayEnd = dbOffice.IndividualSchedule.SaturdayEnd,
-							SundayStart = dbOffice.IndividualSchedule.SundayStart,
-							SundayEnd = dbOffice.IndividualSchedule.SundayEnd,
-						},
-						LegalEntitySchedule = new OfficeScheduleModel()
-						{
-							MondayStart = dbOffice.LegalEntitySchedule.MondayStart,
-							MondayEnd = dbOffice.LegalEntitySchedule.MondayEnd,
-							TuesdayStart = dbOffice.LegalEntitySchedule.TuesdayStart,
-							TuesdayEnd = dbOffice.LegalEntitySchedule.TuesdayEnd,
-							WednesdayStart = dbOffice.LegalEntitySchedule.WednesdayStart,
-							WednesdayEnd = dbOffice.LegalEntitySchedule.WednesdayEnd,
-							ThursdayStart = dbOffice.LegalEntitySchedule.ThursdayStart,
-							ThursdayEnd = dbOffice.LegalEntitySchedule.ThursdayEnd,
-							FridayStart = dbOffice.LegalEntitySchedule.FridayStart,
-							FridayEnd = dbOffice.LegalEntitySchedule.FridayEnd,
-							SaturdayStart = dbOffice.LegalEntitySchedule.SaturdayStart,
-							SaturdayEnd = dbOffice.LegalEntitySchedule.SaturdayEnd,
-							SundayStart = dbOffice.LegalEntitySchedule.SundayStart,
-							SundayEnd = dbOffice.LegalEntitySchedule.SundayEnd,
-						}
-					};
+					return new OfficeModel(dbOffice);
 				}
 					
 			}
@@ -152,7 +83,7 @@ namespace LightFireMoreTech5.Services
 			}
 		}
 
-		public async Task<BankPoint[]> GetPointsInRadiusAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token)
+		public async Task<PointsInRadiusModel> GetPointsInRadiusAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token)
 		{
 			radius = Math.Min(radius, 5000);
 
@@ -163,46 +94,65 @@ namespace LightFireMoreTech5.Services
 					var coordinate = new Coordinate(latitude, longitude);
 					Point point = new Point(coordinate) { SRID = 4326 };
 
-					var dbModels = await context.Offices
+					var dbOffices = await context.Offices
 						.AsNoTracking()
 						.Include(x => x.OfficeServices)
+						.Include(x => x.IndividualSchedule)
+						.Include(x => x.LegalEntitySchedule)
 						.Where(x => x.Location.Distance(point) <= radius)
 						.Where(x => serviceIds.IsNullOrEmpty() || x.OfficeServices.Any(y => serviceIds.Contains(y.serviceId)))
 						.ToArrayAsync(token);
 
-					BankPoint[] result = dbModels
-						.Select(x => new BankPoint()
-						{
-							Id = x.Id,
-							Type = PointType.Office,
-							Latitude = x.Location.Coordinate.X,
-							Longitude = x.Location.Coordinate.Y,
-
-						})
+					OfficeModel[] offices = dbOffices
+						.Select(x => new OfficeModel(x))
 						.ToArray();
 
-					if (!result.Any())
+					if (!offices.Any())
 					{
 						var nearest = await context.Offices
+							.Include(x => x.IndividualSchedule)
+							.Include(x => x.LegalEntitySchedule)
+							.OrderBy(x => x.Location.Distance(point))
+							.FirstOrDefaultAsync(token);
+
+						if (nearest != null)
+						{
+							offices = new OfficeModel[] {
+								new OfficeModel(nearest)
+							};
+						}
+					}
+
+					var dbAtms = await context.Atms
+						.AsNoTracking()
+						.Where(x => x.Location.Distance(point) <= radius)
+						.Where(x => serviceIds.IsNullOrEmpty() || x.AtmServices.Any(y => serviceIds.Contains(y.serviceId)))
+						.ToArrayAsync(token);
+
+					AtmModel[] atms = dbAtms
+						.Select(x => new AtmModel(x))
+						.ToArray();
+
+					if (!atms.Any())
+					{
+						var nearest = await context.Atms
 							.AsNoTracking()
 							.OrderBy(x => x.Location.Distance(point))
 							.FirstOrDefaultAsync(token);
 
 						if (nearest != null)
 						{
-							result = new BankPoint[] {
-							new BankPoint()
-							{
-								Id = nearest.Id,
-								Type = PointType.Office,
-								Latitude = nearest.Location.Coordinate.X,
-								Longitude = nearest.Location.Coordinate.Y,
-							}
-						};
+							atms = new AtmModel[] {
+								new AtmModel(nearest)
+							};
 						}
 					}
 
-					return result;
+					return new PointsInRadiusModel()
+					{
+						Offices = offices,
+						Atms = atms
+					};
 				}
 					
 			}
