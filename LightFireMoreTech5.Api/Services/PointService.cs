@@ -1,6 +1,7 @@
 using LightFireMoreTech5.Api.Models.Requests;
 using LightFireMoreTech5.Data;
 using LightFireMoreTech5.Data.Entities;
+using LightFireMoreTech5.Data.Enums;
 using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Models.Enums;
 using LightFireMoreTech5.Models.Routes;
@@ -114,7 +115,7 @@ namespace LightFireMoreTech5.Services
 			}
 		}
 
-		public async Task<PointsInRadiusModel> GetPointsInRadiusAsync(double latitude, double longitude, double radius, PointType? type, List<long> serviceIds, CancellationToken token)
+		public async Task<PointsInRadiusModel> GetPointsInRadiusAsync(double latitude, double longitude, double radius, ClientType? type, List<long> serviceIds, CancellationToken token)
 		{
 			radius = Math.Min(radius, 5000);
 
@@ -123,19 +124,22 @@ namespace LightFireMoreTech5.Services
 				OfficeModel[] offices = Array.Empty<OfficeModel>();
 				AtmModel[] atms = Array.Empty<AtmModel>();
 
-
-				if (type == PointType.Office)
+				ServiceType? serviceType = type switch
 				{
-					offices = await FindOfficesAsync(latitude, longitude, radius, serviceIds, token);
-				}
-				else if (type == PointType.Atm)
+					ClientType.Atm => ServiceType.Both,
+					ClientType.Individual => ServiceType.Physical,
+					ClientType.LegalEnity => ServiceType.Legal,
+					_ => null
+				};
+				
+				if (type == ClientType.Atm)
 				{
-					atms = await FindAtmsAsync(latitude, longitude, radius, serviceIds, token);
+					atms = await FindAtmsAsync(latitude, longitude, radius,  serviceType, serviceIds, token);
 				}
 				else
 				{
-					offices = await FindOfficesAsync(latitude, longitude, radius, serviceIds, token);
-					atms = await FindAtmsAsync(latitude, longitude, radius, serviceIds, token);
+					offices = await FindOfficesAsync(latitude, longitude, radius, serviceType, serviceIds, token);
+					atms = await FindAtmsAsync(latitude, longitude, radius, serviceType, serviceIds, token);
 				}
 
 
@@ -154,7 +158,8 @@ namespace LightFireMoreTech5.Services
 			}
 		}
 
-		private async Task<OfficeModel[]> FindOfficesAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token)
+		private async Task<OfficeModel[]> FindOfficesAsync(double latitude, double longitude, double radius,
+			ServiceType? serviceType,  List<long> serviceIds, CancellationToken token)
 		{
 			using (var context = await _dbContextFactory.CreateDbContextAsync())
 			{
@@ -164,13 +169,15 @@ namespace LightFireMoreTech5.Services
 				var dbOffices = await context.Offices
 					.AsNoTracking()
 					.Include(x => x.OfficeServices)
+					.ThenInclude(x => x.Service)
 					.Include(x => x.IndividualSchedule)
 					.Include(x => x.LegalEntitySchedule)
 					.Where(x => x.Location.Distance(point) <= radius)
-					.Where(x => serviceIds.IsNullOrEmpty() || x.OfficeServices.Any(y => serviceIds.Contains(y.serviceId)))
+					.Where(x => x.OfficeServices.Any(y => (serviceType == null || y.Service.Type == serviceType) &&
+					(serviceIds.IsNullOrEmpty() || serviceIds.Contains(y.serviceId))))
 					.ToArrayAsync(token);
 
-				OfficeModel[] offices = dbOffices
+				  OfficeModel[] offices = dbOffices
 					.Select(x => new OfficeModel(x))
 					.ToArray();
 
@@ -195,7 +202,7 @@ namespace LightFireMoreTech5.Services
 			}
 		}
 
-		private async Task<AtmModel[]> FindAtmsAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token)
+		private async Task<AtmModel[]> FindAtmsAsync(double latitude, double longitude, double radius, ServiceType? serviceType, List<long> serviceIds, CancellationToken token)
 		{
 			var coordinate = new Coordinate(latitude, longitude);
 			var point = new NetTopologySuite.Geometries.Point(coordinate) { SRID = 4326 };
@@ -203,9 +210,11 @@ namespace LightFireMoreTech5.Services
 			using (var context = await _dbContextFactory.CreateDbContextAsync())
 			{
 				var dbAtms = await context.Atms
-					.AsNoTracking()
+					.Include(x => x.AtmServices)
+					.ThenInclude(x => x.Service)
 				.Where(x => x.Location.Distance(point) <= radius)
-				.Where(x => serviceIds.IsNullOrEmpty() || x.AtmServices.Any(y => serviceIds.Contains(y.serviceId)))
+				.Where(x => x.AtmServices.Any(y => (serviceType == null || y.Service.Type == serviceType) &&
+					(serviceIds.IsNullOrEmpty() || serviceIds.Contains(y.serviceId))))
 				.ToArrayAsync(token);
 
 				AtmModel[] atms = dbAtms

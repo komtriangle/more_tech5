@@ -15,12 +15,12 @@ internal class OfficeServiceServiceConfiguration : IEntityTypeConfiguration<Offi
 
 		builder
 			.HasOne(x => x.Office)
-			.WithMany()
+			.WithMany(x => x.OfficeServices)
 			.HasForeignKey(x => x.officeId);
 
 		builder
 			.HasOne(x => x.Service)
-			.WithMany()
+			.WithMany(x => x.OfficeServices)
 			.HasForeignKey(x => x.serviceId);
 	}
 }

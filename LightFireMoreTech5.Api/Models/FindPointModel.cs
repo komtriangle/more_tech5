@@ -25,7 +25,7 @@ namespace LightFireMoreTech5.Models
 
 	public class FindParameters
 	{
-		public PointType Type { get; set; }
+		public ClientType Type { get; set; }
 		public List<long> SericeIds { get; set; }
 	}
 }

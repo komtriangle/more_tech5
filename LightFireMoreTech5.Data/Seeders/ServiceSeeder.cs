@@ -244,7 +244,8 @@ public class ServiceSeeder
     }
     public static async Task SeedOfficeServicesToDB(BankServicesContext context, List<Service> services)
     {
-        var officeServices = await context.OfficeServices.ToListAsync();
+		var officeServices = await context.OfficeServices.ToListAsync();
+
         if (officeServices.Any())
             return;
 

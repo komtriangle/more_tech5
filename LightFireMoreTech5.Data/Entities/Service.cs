@@ -10,4 +10,6 @@ public class Service
     public ServiceType Type { get; set; }
     public ServiceCategory Category { get; set; }
     public int AverageWaitTime { get; set; }
+
+    public ICollection<OfficeService> OfficeServices { get; set; }
 }
