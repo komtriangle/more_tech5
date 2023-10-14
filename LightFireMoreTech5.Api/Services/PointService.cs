@@ -123,8 +123,9 @@ namespace LightFireMoreTech5.Services
 		{
 			try
 			{
+				using var context = await _dbContextFactory.CreateDbContextAsync();
 				// получаем все окна отделения для нашей операции
-				var office = await _context.Offices
+				var office = await context.Offices
 				.Where(x => x.Id == officeId)
 				.Include(x => x.Windows)
 					.ThenInclude(w => w.WindowServices)
@@ -249,14 +250,14 @@ namespace LightFireMoreTech5.Services
 						if (request.Time < DateTime.Now)
 							throw new Exception("Неверное время отправки");
 
-						deltaTime = request.Time - DateTime.Now;
-						await Task.Delay(deltaTime, token);
+						var wayTime = TimeSpan.FromMinutes(request.WayTime.Ticks);
+						var arriveTime = DateTime.Now.Add(wayTime);
 
-
+						await DelayTicketSending(request, token, arriveTime);
 						break;
 
 					case TakeTicketType.ComeAt:
-
+						await DelayTicketSending(request, token, request.Time);
 						break;
 				}
 				newRequest = new UpdateOfficeWorkloadRequest() { OfficeId = request.OfficeId, ServiceId = request.ServiceId, IsCompleted = false };
@@ -266,6 +267,29 @@ namespace LightFireMoreTech5.Services
 			{
 				_logger.LogError(ex.Message);
 				throw new Exception(ex.Message);
+			}
+		}
+
+		private async Task DelayTicketSending(TakeTicketRequest request, CancellationToken token, DateTime arriveTime)
+		{
+			var waitingTime = await GetOfficeServiceWorkload(request.OfficeId, request.ServiceId, token);
+			var queueTime = DateTime.Now.AddMinutes(waitingTime);
+
+			var maxAttempts = 10;
+			var attempt = 0;
+
+			while (queueTime > arriveTime && attempt < maxAttempts)
+			{
+				var deltaTime = arriveTime - queueTime;
+				if (deltaTime > TimeSpan.Zero)
+				{
+					await Task.Delay(deltaTime, token);
+				}
+
+				waitingTime = await GetOfficeServiceWorkload(request.OfficeId, request.ServiceId, token);
+				queueTime = DateTime.Now.AddMinutes(waitingTime);
+
+				attempt++;
 			}
 		}
 
