@@ -220,15 +220,23 @@ namespace LightFireMoreTech5.Services
 
 				var service = avaliableWindows.FirstOrDefault()?.WindowServices.FirstOrDefault(ws => ws.Service.Id == request.ServiceId)?.Service;
 
-				if(service == null)
+				if (service == null)
 					return;
 
 				// изменяем время ожидания в окнах
 				foreach (var window in avaliableWindows)
 				{
-					window.BusyTime = request.IsCompleted
-						? window.BusyTime - (service.AverageWaitTime / avaliableWindows.Count())
-						: window.BusyTime + (service.AverageWaitTime / avaliableWindows.Count());
+					if (request.IsCompleted)
+					{
+						window.BusyTime -= service.AverageWaitTime / avaliableWindows.Count();
+						office.WorkLoad -= service.AverageWaitTime / office.Windows.Count();
+					}
+
+					else
+					{
+						window.BusyTime += service.AverageWaitTime / avaliableWindows.Count();
+						office.WorkLoad += service.AverageWaitTime / office.Windows.Count();
+					}
 				}
 
 				await _context.SaveChangesAsync();
