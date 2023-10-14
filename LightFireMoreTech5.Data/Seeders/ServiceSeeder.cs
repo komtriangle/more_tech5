@@ -10,16 +10,87 @@ public class ServiceSeeder
     public static void SeedServices(BankServicesContext context)
     {
         if (context.Services.Any())
-            return;
+            context.Services.RemoveRange(context.Services);
 
         context.Services.AddRange(
+			new Service
+			{
+				Name = "Открытие ИИС",
+				Category = ServiceCategory.Investments,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/personal/investicii/iis/",
+				Type = ServiceType.Physical,
+			},
             new Service
             {
-                Name = "Установка приложения СберБанк Онлайн на iPhone",
-                Category = ServiceCategory.NonFinance,
-                Type = ServiceType.Both,
+                Name = "ВТБ-вклад в рублях",
+                Category = ServiceCategory.Investments,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/vtb-vklad-r/",
+                Type = ServiceType.Physical,
+			},
+			new Service
+			{
+				Name = "ВТБ-вклад в юанях",
+				Category = ServiceCategory.Investments,
+				AvailableOnline = true,
+				OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/vtb-vklad-y/",
+				Type = ServiceType.Physical,
+			},
+            new Service
+            {
+                Name = "Накопительный счет \"Копилка\"",
+                Category = ServiceCategory.Investments,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/nakopitelny-schet-kopilka/",
+                Type = ServiceType.Physical,
+			},
+            new Service
+            {
+                Name = "Вклад \"Новое время\"",
+				Category = ServiceCategory.Investments,
+				AvailableOnline = true,
+				OnlineLink = @"https://www.vtb.ru/personal/vklady-i-scheta/novoe-vremya/",
+				Type = ServiceType.Physical
+			},
+            new Service
+            {
+                Name = "Рассчетный счет для вашего бизнеса",
+                Category = ServiceCategory.BankAccounts,
+                AvailableOnline = false,
+                Type = ServiceType.Legal
+            },
+            new Service{
+                Name = "Универсальная карта для бизнеса",
+                Category = ServiceCategory.Cards,
+                AvailableOnline = false,
+                Type = ServiceType.Legal
             },
             new Service
+            {
+                Name = "Экспресс-креди",
+                Category = ServiceCategory.Credits,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/malyj-biznes/kredity-i-garantii/express-online/",
+                Type = ServiceType.Legal
+            },
+            new Service
+            {
+                Name = "Рассчетный счет для ИП",
+                Category = ServiceCategory.BankAccounts,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/malyj-biznes/otkryt-schet/otkryt-schet-ip/",
+                Type = ServiceType.Legal
+			},
+            new Service
+            {
+                Name = "Рассчетный счет для ООО",
+                Category = ServiceCategory.BankAccounts,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/malyj-biznes/otkryt-schet/otkryt-schet-ooo/",
+                Type = ServiceType.Legal
+			},
+			new Service
             {
                 Name = "КАСКО (подбор и оформление полиса)",
                 Category = ServiceCategory.NonFinance,
@@ -29,7 +100,9 @@ public class ServiceSeeder
             {
                 Name = "ОСАГО (подбор и оформление полиса)",
                 Category = ServiceCategory.NonFinance,
-                Type = ServiceType.Both,
+                AvailableOnline = true,
+                OnlineLink = @"https://www.vtb.ru/personal/drugie-uslugi/strahovye-i-servisnye-produkty/osago/",
+				Type = ServiceType.Both,
             },
             new Service
             {
@@ -120,7 +193,31 @@ public class ServiceSeeder
                 Name = "Военная ипотека",
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
-            });
-        context.SaveChanges();
+            },
+			new Service
+			{
+				Name = "Инвестиционное страхование жизни",
+				Category = ServiceCategory.Insurance,
+				Type = ServiceType.Physical,
+			},
+			new Service
+			{
+				Name = "Страхование жилья",
+				Category = ServiceCategory.Insurance,
+				Type = ServiceType.Physical,
+			},
+			new Service
+			{
+				Name = "Страхование от критических заболеваний",
+				Category = ServiceCategory.Insurance,
+				Type = ServiceType.Physical,
+			},
+			new Service
+		    {
+			    Name = "Страхование от мошенничества",
+			    Category = ServiceCategory.Insurance,
+			    Type = ServiceType.Physical,
+		    });
+		context.SaveChanges();
     }
 }

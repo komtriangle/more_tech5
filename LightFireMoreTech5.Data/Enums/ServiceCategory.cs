@@ -5,5 +5,8 @@ public enum ServiceCategory
     Transfers,
     Deposits,
     Cards,
-    Credits
+    Credits,
+	Investments,
+	Insurance,
+    BankAccounts
 }

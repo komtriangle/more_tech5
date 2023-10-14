@@ -29,14 +29,21 @@ public class ServiceService : IServiceService
 
             if (services == null)
             {
-                return null;
+                return new List<ServiceModel>();
             }
 
             var ans = new List<ServiceModel>();
 
             foreach (var item in services)
             {
-                ans.Add(new ServiceModel { Id = item.Id, Name = item.Name, Category = item.Category });
+                ans.Add(new ServiceModel
+                {  
+                    Id = item.Id, 
+                    Name = item.Name, 
+                    Category = item.Category,
+                    IsAvailableOnline = item.AvailableOnline,
+                    OnlineLink = item.OnlineLink,
+                });
             }
 
             return ans;

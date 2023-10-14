@@ -87,8 +87,6 @@ namespace LightFileMoreTech5
 		{
 			context.Database.Migrate();
 
-			var scopedFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
-
 			ServiceSeeder.SeedServices(context);
 
 
