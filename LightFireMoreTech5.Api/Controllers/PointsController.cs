@@ -43,6 +43,20 @@ namespace LightFireMoreTech5.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
+		[HttpGet("Office/{officeId}/ServiceWorkload/{serviceId}")]
+		public async Task<ActionResult> GetOfficeServiceWorkload(long officeId, long serviceId, CancellationToken token)
+		{
+			try
+			{
+				var time = await _pointService.GetOfficeServiceWorkload(officeId, serviceId, token);
+
+				return Ok(time);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
 		/// <summary>
 		/// Получение информации о банкомате по Id

@@ -70,10 +70,46 @@ namespace LightFireMoreTech5.Services
 					.Include(x => x.LegalEntitySchedule)
 					.FirstOrDefaultAsync(x => x.Id == id, token);
 
-					if (dbOffice == null)
+				if (dbOffice == null)
+				{
+					return null;
+				}
+
+				return new OfficeModel()
+				{
+					Id = id,
+					Latitude = dbOffice.Location.Coordinate.X,
+					Longitude = dbOffice.Location.Coordinate.Y,
+					Name = dbOffice.Name,
+					AllDay = dbOffice.AllDay,
+					Address = dbOffice.Address,
+					HasRamp = dbOffice.HasRamp,
+					Kep = dbOffice.Kep,
+					MetroStation = dbOffice.MetroStation,
+					MyOffice = dbOffice.MyOffice,
+					OfficeType = dbOffice.OfficeType,
+					Rko = dbOffice.Rko,
+					SalePointFormat = dbOffice.SalePointFormat,
+					WorkLoad = dbOffice.WorkLoad,
+					IndividualSchedule = new OfficeScheduleModel()
 					{
-						return null;
-					}
+						MondayStart = dbOffice.IndividualSchedule.MondayStart,
+						MondayEnd = dbOffice.IndividualSchedule.MondayEnd,
+						TuesdayStart = dbOffice.IndividualSchedule.TuesdayStart,
+						TuesdayEnd = dbOffice.IndividualSchedule.TuesdayEnd,
+						WednesdayStart = dbOffice.IndividualSchedule.WednesdayStart,
+						WednesdayEnd = dbOffice.IndividualSchedule.WednesdayEnd,
+						ThursdayStart = dbOffice.IndividualSchedule.ThursdayStart,
+						ThursdayEnd = dbOffice.IndividualSchedule.ThursdayEnd,
+						FridayStart = dbOffice.IndividualSchedule.FridayStart,
+						FridayEnd = dbOffice.IndividualSchedule.FridayEnd,
+						SaturdayStart = dbOffice.IndividualSchedule.SaturdayStart,
+						SaturdayEnd = dbOffice.IndividualSchedule.SaturdayEnd,
+						SundayStart = dbOffice.IndividualSchedule.SundayStart,
+						SundayEnd = dbOffice.IndividualSchedule.SundayEnd,
+					},
+					LegalEntitySchedule = new OfficeScheduleModel()
+
 
 					return new OfficeModel(dbOffice);
 				}
@@ -82,6 +118,35 @@ namespace LightFireMoreTech5.Services
 			catch (Exception ex)
 			{
 				string message = "Ошибка во время получения офиса";
+				_logger.LogError(ex, message);
+				throw new Exception(message);
+			}
+		}
+		public async Task<int> GetOfficeServiceWorkload(long officeId, long serviceId, CancellationToken token)
+		{
+			try
+			{
+				// получаем все окна отделения для нашей операции
+				var office = await _context.Offices
+				.Where(x => x.Id == officeId)
+				.Include(x => x.Windows)
+					.ThenInclude(w => w.WindowServices)
+						.ThenInclude(ws => ws.Service)
+				.FirstOrDefaultAsync();
+
+				if (office == null)
+					return -1;
+
+				var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == serviceId));
+
+				// возвращаем среднее значение в минутах
+				var averageTime = (int)Math.Round(avaliableWindows.Average(w => w.BusyTime));
+
+				return averageTime;
+			}
+			catch (Exception ex)
+			{
+				string message = "Ошибка во время получения точек";
 				_logger.LogError(ex, message);
 				throw new Exception(message);
 			}

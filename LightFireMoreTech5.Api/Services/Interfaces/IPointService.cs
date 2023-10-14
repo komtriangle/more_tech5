@@ -14,7 +14,7 @@ namespace LightFireMoreTech5.Services.Interfaces
 		Task<AtmModel?> GetAtmByIdAsync(long id, CancellationToken token);
 		Task<PointsInRadiusModel> GetPointsInRadiusAsync(double latitude, double longitude, double radius, PointType? type, List<long> serviceIds, CancellationToken token);
 		Task UpdateOfficeWorkloadAsync(UpdateOfficeWorkloadRequest request, CancellationToken token);
+		Task<int> GetOfficeServiceWorkload(long officeId, long serviceId, CancellationToken token);
 		Task<PointShotModel[]> SearchPointsAsync(string search, RoutePoint? userCoordinates, CancellationToken token);
-
 	}
 }

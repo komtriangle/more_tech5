@@ -47,7 +47,10 @@ namespace LightFireMoreTech5.Models
 		/// Формат ТП
 		/// </summary>
 		public string SalePointFormat { get; set; }
-
+  	/// <summary>
+		/// Общая для отделения нагруженность
+		/// </summary>
+		public int WorkLoad { get; set; }
 		/// <summary>
 		/// Расписание для физ лиц
 		/// </summary>
