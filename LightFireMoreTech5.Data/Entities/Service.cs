@@ -9,4 +9,5 @@ public class Service
     public string OnlineLink { get; set; } = string.Empty;
     public ServiceType Type { get; set; }
     public ServiceCategory Category { get; set; }
+    public int AverageWaitTime { get; set; }
 }

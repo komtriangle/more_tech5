@@ -6,7 +6,7 @@ namespace LightFireMoreTech5.Data.Entities
 	public class Atm
 	{
 		public long Id { get; set; }
-		public bool AllDay { get;set; }
+		public bool AllDay { get; set; }
 
 		public string Address { get; set; }
 		public ServiceCapability WheelChairCapability { get; set; }
@@ -34,5 +34,7 @@ namespace LightFireMoreTech5.Data.Entities
 		public ServiceActivity SupportRubActivity { get; set; }
 
 		public Point Location { get; set; }
+
+		public List<AtmService> AtmServices { get; set; }
 	}
 }

@@ -11,6 +11,8 @@ public class ServiceSeeder
     {
         var services = await SeedServicesToDB(context);
         await SeedOfficeServicesToDB(context, services);
+        await SeedOfficeWindowToDB(context);
+        await SeedWindowServiceToDB(context, services);
     }
 
     private async static Task<List<Service>> SeedServicesToDB(BankServicesContext context)
@@ -204,7 +206,6 @@ public class ServiceSeeder
         await context.SaveChangesAsync();
         return context.Services.ToList();
     }
-
     public static async Task SeedOfficeServicesToDB(BankServicesContext context, List<Service> services)
     {
         var officeServices = await context.OfficeServices.ToListAsync();
@@ -234,6 +235,66 @@ public class ServiceSeeder
         }
 
         context.OfficeServices.AddRange(officeServices);
+        await context.SaveChangesAsync();
+    }
+    public static async Task SeedOfficeWindowToDB(BankServicesContext context)
+    {
+        var windows = await context.Windows.ToListAsync();
+        if (windows.Any())
+            return;
+
+        var officeIds = await context.Offices.Select(o => o.Id).ToListAsync();
+
+        var random = new Random();
+
+        foreach (var officeId in officeIds)
+        {
+            int numberOfWindows = random.Next(1, windows.Count + 1);
+
+            var randomServiceIndices = Enumerable.Range(0, windows.Count).OrderBy(x => random.Next()).Take(numberOfWindows);
+
+            foreach (var windowIndex in randomServiceIndices)
+            {
+                var window = new Window
+                {
+                    officeId = officeId,
+                };
+                windows.Add(window);
+            }
+        }
+
+        context.Windows.AddRange(windows);
+        await context.SaveChangesAsync();
+    }
+    public static async Task SeedWindowServiceToDB(BankServicesContext context, List<Service> services)
+    {
+        var WindowServices = await context.WindowServices.ToListAsync();
+        if (WindowServices.Any())
+            return;
+
+        var serviceIds = services.Select(s => s.Id).ToList();
+        var windowIds = await context.Windows.Select(o => o.Id).ToListAsync();
+
+        var random = new Random();
+
+        foreach (var windowId in windowIds)
+        {
+            int numberOfServices = random.Next(1, services.Count + 1);
+
+            var randomServiceIndices = Enumerable.Range(0, services.Count).OrderBy(x => random.Next()).Take(numberOfServices);
+
+            foreach (var serviceIndex in randomServiceIndices)
+            {
+                var windowService = new WindowService
+                {
+                    windowId = windowId,
+                    serviceId = services[serviceIndex].Id
+                };
+                WindowServices.Add(windowService);
+            }
+        }
+
+        context.WindowServices.AddRange(WindowServices);
         await context.SaveChangesAsync();
     }
 }
