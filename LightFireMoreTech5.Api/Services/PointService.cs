@@ -219,40 +219,44 @@ namespace LightFireMoreTech5.Services
 			try
 			{
 				// получаем все окна отделения для нашей операции
-				var office = await _context.Offices
-				.Where(x => x.Id == request.OfficeId)
-				.Include(x => x.Windows)
-					.ThenInclude(w => w.WindowServices)
-						.ThenInclude(ws => ws.Service)
-				.FirstOrDefaultAsync();
-
-				if (office == null)
-					return;
-
-				var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == request.ServiceId));
-
-				var service = avaliableWindows.FirstOrDefault()?.WindowServices.FirstOrDefault(ws => ws.Service.Id == request.ServiceId)?.Service;
-
-				if (service == null)
-					return;
-
-				// изменяем время ожидания в окнах
-				foreach (var window in avaliableWindows)
+				using (var context = await _dbContextFactory.CreateDbContextAsync())
 				{
-					if (request.IsCompleted)
+					var office = await context.Offices
+						.Where(x => x.Id == request.OfficeId)
+						.Include(x => x.Windows)
+							.ThenInclude(w => w.WindowServices)
+								.ThenInclude(ws => ws.Service)
+						.FirstOrDefaultAsync();
+
+					if (office == null)
+						return;
+
+					var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == request.ServiceId));
+
+					var service = avaliableWindows.FirstOrDefault()?.WindowServices.FirstOrDefault(ws => ws.Service.Id == request.ServiceId)?.Service;
+
+					if (service == null)
+						return;
+
+					// изменяем время ожидания в окнах
+					foreach (var window in avaliableWindows)
 					{
-						window.BusyTime -= service.AverageWaitTime / avaliableWindows.Count();
-						office.WorkLoad -= service.AverageWaitTime / office.Windows.Count();
+						if (request.IsCompleted)
+						{
+							window.BusyTime -= service.AverageWaitTime / avaliableWindows.Count();
+							office.WorkLoad -= service.AverageWaitTime / office.Windows.Count();
+						}
+
+						else
+						{
+							window.BusyTime += service.AverageWaitTime / avaliableWindows.Count();
+							office.WorkLoad += service.AverageWaitTime / office.Windows.Count();
+						}
 					}
 
-					else
-					{
-						window.BusyTime += service.AverageWaitTime / avaliableWindows.Count();
-						office.WorkLoad += service.AverageWaitTime / office.Windows.Count();
-					}
+					await context.SaveChangesAsync();
 				}
-
-				await _context.SaveChangesAsync();
+					
 			}
 			catch (Exception ex)
 			{
