@@ -1,7 +1,6 @@
 using LightFireMoreTech5.Api.Models.Requests;
 using LightFireMoreTech5.Data;
 using LightFireMoreTech5.Data.Entities;
-using LightFireMoreTech5.Data.Enums;
 using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Models.Enums;
 using LightFireMoreTech5.Models.Routes;
@@ -9,10 +8,6 @@ using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Utilities;
-using RTools_NTS.Util;
-using System.Drawing;
-using System.Linq;
 using Point = NetTopologySuite.Geometries.Point;
 
 namespace LightFireMoreTech5.Services
@@ -47,7 +42,7 @@ namespace LightFireMoreTech5.Services
 					}
 
 					return new AtmModel(dbAtm);
-					
+
 				}
 
 			}
@@ -70,50 +65,14 @@ namespace LightFireMoreTech5.Services
 					.Include(x => x.LegalEntitySchedule)
 					.FirstOrDefaultAsync(x => x.Id == id, token);
 
-				if (dbOffice == null)
-				{
-					return null;
-				}
-
-				return new OfficeModel()
-				{
-					Id = id,
-					Latitude = dbOffice.Location.Coordinate.X,
-					Longitude = dbOffice.Location.Coordinate.Y,
-					Name = dbOffice.Name,
-					AllDay = dbOffice.AllDay,
-					Address = dbOffice.Address,
-					HasRamp = dbOffice.HasRamp,
-					Kep = dbOffice.Kep,
-					MetroStation = dbOffice.MetroStation,
-					MyOffice = dbOffice.MyOffice,
-					OfficeType = dbOffice.OfficeType,
-					Rko = dbOffice.Rko,
-					SalePointFormat = dbOffice.SalePointFormat,
-					WorkLoad = dbOffice.WorkLoad,
-					IndividualSchedule = new OfficeScheduleModel()
+					if (dbOffice == null)
 					{
-						MondayStart = dbOffice.IndividualSchedule.MondayStart,
-						MondayEnd = dbOffice.IndividualSchedule.MondayEnd,
-						TuesdayStart = dbOffice.IndividualSchedule.TuesdayStart,
-						TuesdayEnd = dbOffice.IndividualSchedule.TuesdayEnd,
-						WednesdayStart = dbOffice.IndividualSchedule.WednesdayStart,
-						WednesdayEnd = dbOffice.IndividualSchedule.WednesdayEnd,
-						ThursdayStart = dbOffice.IndividualSchedule.ThursdayStart,
-						ThursdayEnd = dbOffice.IndividualSchedule.ThursdayEnd,
-						FridayStart = dbOffice.IndividualSchedule.FridayStart,
-						FridayEnd = dbOffice.IndividualSchedule.FridayEnd,
-						SaturdayStart = dbOffice.IndividualSchedule.SaturdayStart,
-						SaturdayEnd = dbOffice.IndividualSchedule.SaturdayEnd,
-						SundayStart = dbOffice.IndividualSchedule.SundayStart,
-						SundayEnd = dbOffice.IndividualSchedule.SundayEnd,
-					},
-					LegalEntitySchedule = new OfficeScheduleModel()
-
+						return null;
+					}
 
 					return new OfficeModel(dbOffice);
 				}
-					
+
 			}
 			catch (Exception ex)
 			{
@@ -126,23 +85,26 @@ namespace LightFireMoreTech5.Services
 		{
 			try
 			{
-				// получаем все окна отделения для нашей операции
-				var office = await _context.Offices
-				.Where(x => x.Id == officeId)
-				.Include(x => x.Windows)
-					.ThenInclude(w => w.WindowServices)
-						.ThenInclude(ws => ws.Service)
-				.FirstOrDefaultAsync();
+				using(var context = await _dbContextFactory.CreateDbContextAsync())
+				{
+					// получаем все окна отделения для нашей операции
+					var office = await context.Offices
+					.Where(x => x.Id == officeId)
+					.Include(x => x.Windows)
+						.ThenInclude(w => w.WindowServices)
+							.ThenInclude(ws => ws.Service)
+					.FirstOrDefaultAsync();
 
-				if (office == null)
-					return -1;
+					if (office == null)
+						return -1;
 
-				var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == serviceId));
+					var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == serviceId));
 
-				// возвращаем среднее значение в минутах
-				var averageTime = (int)Math.Round(avaliableWindows.Average(w => w.BusyTime));
+					// возвращаем среднее значение в минутах
+					var averageTime = (int)Math.Round(avaliableWindows.Average(w => w.BusyTime));
 
-				return averageTime;
+					return averageTime;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -162,11 +124,11 @@ namespace LightFireMoreTech5.Services
 				AtmModel[] atms = Array.Empty<AtmModel>();
 
 
-				if(type == PointType.Office)
+				if (type == PointType.Office)
 				{
 					offices = await FindOfficesAsync(latitude, longitude, radius, serviceIds, token);
 				}
-				else if(type == PointType.Atm)
+				else if (type == PointType.Atm)
 				{
 					atms = await FindAtmsAsync(latitude, longitude, radius, serviceIds, token);
 				}
@@ -182,7 +144,7 @@ namespace LightFireMoreTech5.Services
 					Offices = offices,
 					Atms = atms
 				};
-					
+
 			}
 			catch (Exception ex)
 			{
@@ -267,7 +229,7 @@ namespace LightFireMoreTech5.Services
 
 				return atms;
 			}
-				
+
 		}
 
 		public async Task UpdateOfficeWorkloadAsync(UpdateOfficeWorkloadRequest request, CancellationToken token)
@@ -312,7 +274,7 @@ namespace LightFireMoreTech5.Services
 
 					await context.SaveChangesAsync();
 				}
-					
+
 			}
 			catch (Exception ex)
 			{
@@ -407,7 +369,7 @@ namespace LightFireMoreTech5.Services
 					.Take(10)
 					.ToArrayAsync(token);
 			}
-				
+
 
 		}
 
@@ -464,7 +426,7 @@ namespace LightFireMoreTech5.Services
 					.Take(10)
 					.ToArrayAsync(token);
 			}
-				
+
 
 		}
 	}
