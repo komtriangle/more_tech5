@@ -27,7 +27,7 @@ public class ServiceService : IServiceService
         {
 			using (var context = await _dbContextFactory.CreateDbContextAsync())
             {
-				var services = await context.Services.Where(x => x.Type == serviceType).ToListAsync();
+				var services = await context.Services.Where(x => serviceType == ServiceType.All || x.Type == serviceType).ToListAsync();
 
 				if (services == null)
 				{
