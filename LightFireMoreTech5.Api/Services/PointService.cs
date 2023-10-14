@@ -241,33 +241,38 @@ namespace LightFireMoreTech5.Services
 			var coordinate = new Coordinate(latitude, longitude);
 			var point = new NetTopologySuite.Geometries.Point(coordinate) { SRID = 4326 };
 
-			using (var context = await _dbContextFactory.CreateDbContextAsync())
+			try
 			{
-				var dbAtms = await context.Atms
-					.Include(x => x.AtmServices)
-					.ThenInclude(x => x.Service)
-				.Where(x => x.Location.Distance(point) <= radius)
-				.Where(x => x.AtmServices.Any(y => (serviceType == null || y.Service.Type == serviceType) &&
-					(serviceIds.IsNullOrEmpty() || serviceIds.Contains(y.serviceId))))
-				.ToArrayAsync(token);
-
-				AtmModel[] atms = dbAtms
-					.Select(x => new AtmModel(x))
-					.ToArray();
-
-				if (!atms.Any())
+				using (var context = await _dbContextFactory.CreateDbContextAsync())
 				{
-					var nearest = await context.Atms
-					.AsNoTracking()
-						.OrderBy(x => x.Location.Distance(point))
-						.FirstOrDefaultAsync(token);
+					var dbAtms = await context.Atms
+						.Include(x => x.AtmServices)
+						.ThenInclude(x => x.Service)
+					.Where(x => x.Location.Distance(point) <= radius)
+					.Where(x => x.AtmServices.Any(y => (serviceType == null || y.Service.Type == serviceType) &&
+						(serviceIds.IsNullOrEmpty() || serviceIds.Contains(y.serviceId))))
+					.ToArrayAsync(token);
 
-					if (nearest != null)
+					AtmModel[] atms = dbAtms
+						.Select(x => new AtmModel(x))
+						.ToArray();
+
+					if (!atms.Any())
 					{
-						atms = new AtmModel[] {
+						var nearest = await context.Atms
+						.AsNoTracking()
+							.OrderBy(x => x.Location.Distance(point))
+							.FirstOrDefaultAsync(token);
+
+						if (nearest != null)
+						{
+							atms = new AtmModel[] {
 								new AtmModel(nearest)
 							};
+						}
 					}
+
+					return atms;
 				}
 			}
 			catch (Exception ex)
