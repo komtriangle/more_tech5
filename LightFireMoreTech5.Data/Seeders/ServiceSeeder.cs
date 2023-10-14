@@ -238,6 +238,7 @@ public class ServiceSeeder
                 Type = ServiceType.Both,
                 AverageWaitTime = random.Next(1, 10)
             });
+
         await context.SaveChangesAsync();
         return context.Services.ToList();
     }
