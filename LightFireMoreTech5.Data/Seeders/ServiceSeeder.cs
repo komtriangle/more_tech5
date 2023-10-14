@@ -20,115 +20,134 @@ public class ServiceSeeder
         var services = await context.Services.ToListAsync();
         if (services.Any())
             return services;
+        var random = new Random();
 
         context.Services.AddRange(
             new Service
             {
-                Name = "Установка приложения СберБанк Онлайн на iPhone",
+                Name = "Установка приложения на iPhone",
                 Category = ServiceCategory.NonFinance,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "КАСКО (подбор и оформление полиса)",
                 Category = ServiceCategory.NonFinance,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "ОСАГО (подбор и оформление полиса)",
                 Category = ServiceCategory.NonFinance,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Кофе в ВТБ",
                 Category = ServiceCategory.NonFinance,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Переводы в рублях",
                 Category = ServiceCategory.Transfers,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Переводы в иностранной валюте",
                 Category = ServiceCategory.Transfers,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Сберегательные сертификаты банка",
                 Category = ServiceCategory.Deposits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Покупка монет из драгоценных металлов",
                 Category = ServiceCategory.Deposits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Продажа монет из драгоценных металлов",
                 Category = ServiceCategory.Deposits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Обезличенные металлические счета",
                 Category = ServiceCategory.Deposits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Предоставление в аренду индивидуальных сейфов",
                 Category = ServiceCategory.Deposits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Кредитные карты",
                 Category = ServiceCategory.Cards,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Дебетовые карты",
                 Category = ServiceCategory.Cards,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Консультирование по ипотечным кредитам",
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Выдача и оформление ипотечных кредитов",
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Оформление и выдача потребительских кредитов",
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Оформление и выдача автокредитов",
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             },
             new Service
             {
                 Name = "Военная ипотека",
                 Category = ServiceCategory.Credits,
                 Type = ServiceType.Both,
+                AverageWaitTime = random.Next(1, 10)
             });
         await context.SaveChangesAsync();
         return context.Services.ToList();

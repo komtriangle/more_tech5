@@ -1,4 +1,5 @@
-﻿using LightFireMoreTech5.Models;
+﻿using LightFireMoreTech5.Api.Models.Requests;
+using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -64,6 +65,21 @@ namespace LightFireMoreTech5.Controllers
 				var points = await _pointService.GetPointsInRadiusAsync(request.Latitude, request.Longitude, request.Radius, request.ServiceIds, token);
 
 				return Ok(points);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
+
+		[HttpPost("Office/Workload")]
+		public async Task<ActionResult> UpdateOfficeWorkload([FromBody] UpdateOfficeWorkloadRequest request, CancellationToken token)
+		{
+			try
+			{
+				await _pointService.UpdateOfficeWorkloadAsync(request, token);
+
+				return Ok();
 			}
 			catch (Exception ex)
 			{
