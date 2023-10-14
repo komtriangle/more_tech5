@@ -6,7 +6,7 @@ namespace LightFireMoreTech5.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
-	public class PointsController: Controller
+	public class PointsController : Controller
 	{
 		private readonly IPointService _pointService;
 
@@ -30,7 +30,7 @@ namespace LightFireMoreTech5.Controllers
 			{
 				var office = await _pointService.GetOfficeByIdAsync(id, token);
 
-				if(office == null)
+				if (office == null)
 				{
 					return NotFound("Офис не найден");
 				}
@@ -80,7 +80,7 @@ namespace LightFireMoreTech5.Controllers
 		{
 			try
 			{
-				var points = await _pointService.GetPointsInRadiusAsync(request.Latitude, request.Longitude, request.Radius, token);
+				var points = await _pointService.GetPointsInRadiusAsync(request.Latitude, request.Longitude, request.Radius, request.ServiceIds, token);
 
 				return Ok(points);
 			}

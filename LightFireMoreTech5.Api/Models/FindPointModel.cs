@@ -16,5 +16,6 @@
 		/// Радиус, в котором ищем отделния и банкоматы
 		/// </summary>
 		public double Radius { get; set; }
+		public List<long> ServiceIds { get; set; }
 	}
 }

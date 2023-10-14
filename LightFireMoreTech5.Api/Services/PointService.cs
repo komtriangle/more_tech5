@@ -4,6 +4,7 @@ using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Models.Enums;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite.Geometries;
 
 namespace LightFireMoreTech5.Services
@@ -20,7 +21,7 @@ namespace LightFireMoreTech5.Services
 			_context = context ??
 				throw new ArgumentNullException(nameof(context));
 
-			_logger = logger ?? 
+			_logger = logger ??
 				throw new ArgumentNullException(nameof(logger));
 		}
 
@@ -60,7 +61,7 @@ namespace LightFireMoreTech5.Services
 				};
 
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				string message = "Ошибка во время получения банкомата";
 				_logger.LogError(ex, message);
@@ -77,7 +78,7 @@ namespace LightFireMoreTech5.Services
 					.Include(x => x.LegalEntitySchedule)
 					.FirstOrDefaultAsync(x => x.Id == id, token);
 
-				if(dbOffice == null)
+				if (dbOffice == null)
 				{
 					return null;
 				}
@@ -132,7 +133,7 @@ namespace LightFireMoreTech5.Services
 					}
 				};
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				string message = "Ошибка во время получения офиса";
 				_logger.LogError(ex, message);
@@ -140,7 +141,7 @@ namespace LightFireMoreTech5.Services
 			}
 		}
 
-		public async Task<BankPoint[]> GetPointsInRadiusAsync(double latitude, double longitude, double radius, CancellationToken token)
+		public async Task<BankPoint[]> GetPointsInRadiusAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token)
 		{
 			radius = Math.Min(radius, 5000);
 
@@ -151,10 +152,10 @@ namespace LightFireMoreTech5.Services
 
 				var dbModels = await _context.Offices
 					.AsNoTracking()
-					.Where(x => x.Location.Distance(point) <= radius)
+					.Where(x => x.Location.Distance(point) <= radius && (serviceIds.IsNullOrEmpty() || serviceIds.Contains(x.Id)))
 					.ToArrayAsync(token);
 
-				BankPoint[] result =  dbModels
+				BankPoint[] result = dbModels
 					.Select(x => new BankPoint()
 					{
 						Id = x.Id,
