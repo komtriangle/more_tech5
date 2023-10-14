@@ -7,4 +7,5 @@ public class Service
     public string Name { get; set; }
     public ServiceType Type { get; set; }
     public ServiceCategory Category { get; set; }
+    public int AverageWaitTime { get; set; }
 }
