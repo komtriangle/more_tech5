@@ -243,12 +243,14 @@ public class ServiceSeeder
                 Type = ServiceType.Both,
                 AverageWaitTime = random.Next(1, 10)
             });
+
         await context.SaveChangesAsync();
         return context.Services.ToList();
     }
     public static async Task SeedOfficeServicesToDB(BankServicesContext context, List<Service> services)
     {
-        var officeServices = await context.OfficeServices.ToListAsync();
+		var officeServices = await context.OfficeServices.ToListAsync();
+
         if (officeServices.Any())
         {
             context.OfficeServices.RemoveRange(officeServices);

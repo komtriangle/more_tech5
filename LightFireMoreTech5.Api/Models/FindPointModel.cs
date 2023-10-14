@@ -1,4 +1,6 @@
-﻿namespace LightFireMoreTech5.Models
+﻿using LightFireMoreTech5.Models.Enums;
+
+namespace LightFireMoreTech5.Models
 {
 	public class FindPointModel
 	{
@@ -16,6 +18,14 @@
 		/// Радиус, в котором ищем отделния и банкоматы
 		/// </summary>
 		public double Radius { get; set; }
-		public List<long> ServiceIds { get; set; }
+
+		public FindParameters? Parameters { get; set; }
+
+	}
+
+	public class FindParameters
+	{
+		public ClientType Type { get; set; }
+		public List<long> SericeIds { get; set; }
 	}
 }

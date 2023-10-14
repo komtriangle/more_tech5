@@ -22,7 +22,7 @@ namespace LightFireMoreTech5.Data.Entities
 		public int WorkLoad { get; set; }
 		public virtual OfficeSchedule IndividualSchedule { get; set; }
 		public virtual OfficeSchedule LegalEntitySchedule { get; set; }
-		public List<OfficeService> OfficeServices { get; set; }
-		public List<Window> Windows { get; set; }
+		public virtual List<OfficeService> OfficeServices { get; set; }
+		public virtual List<Window> Windows { get; set; }
 	}
 }

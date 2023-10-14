@@ -11,7 +11,7 @@ using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite.Geometries;
-using System.Linq;
+using Point = NetTopologySuite.Geometries.Point;
 
 namespace LightFireMoreTech5.Services
 {
@@ -72,7 +72,6 @@ namespace LightFireMoreTech5.Services
 					{
 						return null;
 					}
-
 					return new OfficeModel()
 					{
 						Id = id,
@@ -132,15 +131,15 @@ namespace LightFireMoreTech5.Services
 						.ThenInclude(ws => ws.Service)
 				.FirstOrDefaultAsync();
 
-				if (office == null)
-					return -1;
+					if (office == null)
+						return -1;
 
-				var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == serviceId));
+					var avaliableWindows = office.Windows.Where(x => x.WindowServices.Any(ws => ws.Service.Id == serviceId));
 
-				// возвращаем среднее значение в минутах
-				var averageTime = (int)Math.Round(avaliableWindows.Average(w => w.BusyTime));
+					// возвращаем среднее значение в минутах
+					var averageTime = (int)Math.Round(avaliableWindows.Average(w => w.BusyTime));
 
-				return averageTime;
+					return averageTime;
 			}
 			catch (Exception ex)
 			{
@@ -150,77 +149,39 @@ namespace LightFireMoreTech5.Services
 			}
 		}
 
-		public async Task<PointsInRadiusModel> GetPointsInRadiusAsync(double latitude, double longitude, double radius, List<long> serviceIds, CancellationToken token)
+		public async Task<PointsInRadiusModel> GetPointsInRadiusAsync(double latitude, double longitude, double radius, ClientType? type, List<long> serviceIds, CancellationToken token)
 		{
 			radius = Math.Min(radius, 5000);
 
 			try
 			{
-				using (var context = await _dbContextFactory.CreateDbContextAsync())
+				OfficeModel[] offices = Array.Empty<OfficeModel>();
+				AtmModel[] atms = Array.Empty<AtmModel>();
+
+				ServiceType? serviceType = type switch
 				{
-					var coordinate = new Coordinate(latitude, longitude);
-					Point point = new Point(coordinate) { SRID = 4326 };
-
-					var dbOffices = await context.Offices
-						.AsNoTracking()
-						.Include(x => x.OfficeServices)
-						.Include(x => x.IndividualSchedule)
-						.Include(x => x.LegalEntitySchedule)
-						.Where(x => x.Location.Distance(point) <= radius)
-						.Where(x => serviceIds.IsNullOrEmpty() || x.OfficeServices.Any(y => serviceIds.Contains(y.serviceId)))
-						.ToArrayAsync(token);
-
-					OfficeModel[] offices = dbOffices
-						.Select(x => new OfficeModel(x))
-						.ToArray();
-
-					if (!offices.Any())
-					{
-						var nearest = await context.Offices
-							.Include(x => x.IndividualSchedule)
-							.Include(x => x.LegalEntitySchedule)
-							.OrderBy(x => x.Location.Distance(point))
-							.FirstOrDefaultAsync(token);
-
-						if (nearest != null)
-						{
-							offices = new OfficeModel[] {
-								new OfficeModel(nearest)
-							};
-						}
-					}
-
-					var dbAtms = await context.Atms
-						.AsNoTracking()
-						.Where(x => x.Location.Distance(point) <= radius)
-						.Where(x => serviceIds.IsNullOrEmpty() || x.AtmServices.Any(y => serviceIds.Contains(y.serviceId)))
-						.ToArrayAsync(token);
-
-					AtmModel[] atms = dbAtms
-						.Select(x => new AtmModel(x))
-						.ToArray();
-
-					if (!atms.Any())
-					{
-						var nearest = await context.Atms
-							.AsNoTracking()
-							.OrderBy(x => x.Location.Distance(point))
-							.FirstOrDefaultAsync(token);
-
-						if (nearest != null)
-						{
-							atms = new AtmModel[] {
-								new AtmModel(nearest)
-							};
-						}
-					}
-
-					return new PointsInRadiusModel()
-					{
-						Offices = offices,
-						Atms = atms
-					};
+					ClientType.Atm => ServiceType.Both,
+					ClientType.Individual => ServiceType.Physical,
+					ClientType.LegalEnity => ServiceType.Legal,
+					_ => null
+				};
+				
+				if (type == ClientType.Atm)
+				{
+					atms = await FindAtmsAsync(latitude, longitude, radius,  serviceType, serviceIds, token);
 				}
+				else
+				{
+					offices = await FindOfficesAsync(latitude, longitude, radius, serviceType, serviceIds, token);
+					atms = await FindAtmsAsync(latitude, longitude, radius, serviceType, serviceIds, token);
+				}
+
+
+				return new PointsInRadiusModel()
+				{
+					Offices = offices,
+					Atms = atms
+				};
 
 			}
 			catch (Exception ex)
@@ -229,6 +190,93 @@ namespace LightFireMoreTech5.Services
 				_logger.LogError(ex, message);
 				throw new Exception(message);
 			}
+		}
+
+		private async Task<OfficeModel[]> FindOfficesAsync(double latitude, double longitude, double radius,
+			ServiceType? serviceType,  List<long> serviceIds, CancellationToken token)
+		{
+			using (var context = await _dbContextFactory.CreateDbContextAsync())
+			{
+				var coordinate = new Coordinate(latitude, longitude);
+				Point point = new Point(coordinate) { SRID = 4326 };
+
+				var dbOffices = await context.Offices
+					.AsNoTracking()
+					.Include(x => x.OfficeServices)
+					.ThenInclude(x => x.Service)
+					.Include(x => x.IndividualSchedule)
+					.Include(x => x.LegalEntitySchedule)
+					.Where(x => x.Location.Distance(point) <= radius)
+					.Where(x => x.OfficeServices.Any(y => (serviceType == null || y.Service.Type == serviceType) &&
+					(serviceIds.IsNullOrEmpty() || serviceIds.Contains(y.serviceId))))
+					.ToArrayAsync(token);
+
+				  OfficeModel[] offices = dbOffices
+					.Select(x => new OfficeModel(x))
+					.ToArray();
+
+				if (!offices.Any())
+				{
+					var nearest = await context.Offices
+						.Include(x => x.IndividualSchedule)
+						.Include(x => x.LegalEntitySchedule)
+						.OrderBy(x => x.Location.Distance(point))
+						.FirstOrDefaultAsync(token);
+
+					if (nearest != null)
+					{
+						offices = new OfficeModel[] {
+								new OfficeModel(nearest)
+							};
+					}
+				}
+
+
+				return offices;
+			}
+		}
+
+		private async Task<AtmModel[]> FindAtmsAsync(double latitude, double longitude, double radius, ServiceType? serviceType, List<long> serviceIds, CancellationToken token)
+		{
+			var coordinate = new Coordinate(latitude, longitude);
+			var point = new NetTopologySuite.Geometries.Point(coordinate) { SRID = 4326 };
+
+			using (var context = await _dbContextFactory.CreateDbContextAsync())
+			{
+				var dbAtms = await context.Atms
+					.Include(x => x.AtmServices)
+					.ThenInclude(x => x.Service)
+				.Where(x => x.Location.Distance(point) <= radius)
+				.Where(x => x.AtmServices.Any(y => (serviceType == null || y.Service.Type == serviceType) &&
+					(serviceIds.IsNullOrEmpty() || serviceIds.Contains(y.serviceId))))
+				.ToArrayAsync(token);
+
+				AtmModel[] atms = dbAtms
+					.Select(x => new AtmModel(x))
+					.ToArray();
+
+				if (!atms.Any())
+				{
+					var nearest = await context.Atms
+					.AsNoTracking()
+						.OrderBy(x => x.Location.Distance(point))
+						.FirstOrDefaultAsync(token);
+
+					if (nearest != null)
+					{
+						atms = new AtmModel[] {
+								new AtmModel(nearest)
+							};
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				string message = "Ошибка во время получения точек";
+				_logger.LogError(ex, message);
+				throw new Exception(message);
+			}
+
 		}
 
 		public async Task TakeTicket(TakeTicketRequest request, CancellationToken token)

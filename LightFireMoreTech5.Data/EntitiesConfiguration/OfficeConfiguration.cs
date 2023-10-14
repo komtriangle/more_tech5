@@ -85,6 +85,7 @@ namespace LightFireMoreTech5.Data.EntitiesConfiguration
 			builder.HasOne(e => e.IndividualSchedule)
 				.WithMany(e => e.IndividualOffices)
 				.HasForeignKey(e => e.IndividualShceduleId);
+
 		}
 	}
 }
