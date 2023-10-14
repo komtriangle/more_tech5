@@ -21,5 +21,6 @@ namespace LightFireMoreTech5.Data.Entities
 		public long LegalEntityShceduleId { get; set; }
 		public virtual OfficeSchedule IndividualSchedule { get; set; }
 		public virtual OfficeSchedule LegalEntitySchedule { get; set; }
+		public List<OfficeService> OfficeServices { get; set; }
 	}
 }
