@@ -127,7 +127,7 @@ public class ServiceSeeder
             {
                 Name = "ОСАГО (подбор и оформление полиса)",
                 Category = ServiceCategory.NonFinance,
-                AverageWaitTime = random.Next(1, 10)
+                AverageWaitTime = random.Next(1, 10),
                 AvailableOnline = true,
                 OnlineLink = @"https://www.vtb.ru/personal/drugie-uslugi/strahovye-i-servisnye-produkty/osago/",
 				        Type = ServiceType.Both,

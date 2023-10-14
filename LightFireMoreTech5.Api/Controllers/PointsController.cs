@@ -101,7 +101,7 @@ namespace LightFireMoreTech5.Controllers
 				await _pointService.UpdateOfficeWorkloadAsync(request, token);
 
 				return Ok();
-
+			}
 			catch (Exception ex)
 			{
 				return BadRequest(ex.Message);
@@ -117,11 +117,22 @@ namespace LightFireMoreTech5.Controllers
 				return BadRequest("Необходимо заполнить поле Search");
 			}
 
+			if (request.Search.Length < 3)
+			{
+				return BadRequest("Минимальная строка поиска - 3 символа");
+
+			}
+
 			try
 			{
 				var points = await _pointService.SearchPointsAsync(request.Search, request.UserCoordinates, token);
 
 				return Ok(points);
 			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 	}
 }

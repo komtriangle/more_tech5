@@ -76,7 +76,7 @@ namespace LightFileMoreTech5
 			services.AddTransient<IPathService, PathService>();
 			services.AddTransient<ServiceSeeder>();
 
-			services.AddDbContext<BankServicesContext>(options => options
+			services.AddDbContextFactory<BankServicesContext>(options => options
 					  .UseNpgsql(_configuration.GetConnectionString("PostgreConnectionString"),
 					  x => x.UseNetTopologySuite().MigrationsAssembly("LightFireMoreTech5"))
 			   .UseLowerCaseNamingConvention());
