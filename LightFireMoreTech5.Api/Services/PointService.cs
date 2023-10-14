@@ -1,12 +1,15 @@
-﻿using LightFireMoreTech5.Api.Models.Requests;
+using LightFireMoreTech5.Api.Models.Requests;
 using LightFireMoreTech5.Data;
+using LightFireMoreTech5.Data.Entities;
 using LightFireMoreTech5.Data.Enums;
 using LightFireMoreTech5.Models;
 using LightFireMoreTech5.Models.Enums;
+using LightFireMoreTech5.Models.Routes;
 using LightFireMoreTech5.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite.Geometries;
+using System.Linq;
 
 namespace LightFireMoreTech5.Services
 {
@@ -90,7 +93,6 @@ namespace LightFireMoreTech5.Services
 					Latitude = dbOffice.Location.Coordinate.X,
 					Longitude = dbOffice.Location.Coordinate.Y,
 					Name = dbOffice.Name,
-					AllDay = dbOffice.AllDay,
 					Address = dbOffice.Address,
 					HasRamp = dbOffice.HasRamp,
 					Kep = dbOffice.Kep,
@@ -246,6 +248,141 @@ namespace LightFireMoreTech5.Services
 				_logger.LogError(ex.Message);
 				throw new Exception(ex.Message);
 			}
+
+		}
+		public async Task<PointShotModel[]> SearchPointsAsync(string search, RoutePoint? userCoordinates, CancellationToken token)
+		{
+			try
+			{
+				var points = await Task.WhenAll(SearchAtms(search, userCoordinates, token), SearchOffices(search, userCoordinates, token));
+
+				if (points == null || points.Length != 2)
+					throw new Exception("Ошибка во время поиска точек");
+
+				var atms = points[0];
+				var offices = points[1];
+
+				var result = atms.Union(offices);
+
+				return result
+					.OrderByDescending(x => x.DistanceMetres ?? double.MaxValue)
+					.ThenBy(x => x.Name)
+					.ToArray();
+			}
+			catch (Exception ex)
+			{
+				string message = "Ошибка поиска точек";
+				_logger.LogError(ex, message);
+
+				throw new Exception(message);
+			}
+		}
+
+		private async Task<PointShotModel[]> SearchOffices(string search, RoutePoint? userCoordinates, CancellationToken token)
+		{
+			if (string.IsNullOrEmpty(search))
+			{
+				return Array.Empty<PointShotModel>();
+			}
+
+			string[] words = search.Split(' ');
+
+			if (words.Length > 2)
+			{
+				words = new string[] { words[0], words[1] };
+			}
+
+			IQueryable<Office> offices;
+
+			if (words.Length == 1)
+			{
+				string word = words[0];
+
+				offices = _context.Offices
+					.Where(x => x.Name.Contains(word) ||
+						(x.Address != null && x.Address.Contains(word)) ||
+						(x.MetroStation != null && x.MetroStation.Contains(word)));
+			}
+			else
+			{
+				offices = _context.Offices
+					.Where(x => x.Name.Contains(words[0]) || x.Name.Contains(words[1]) ||
+						x.Address != null && (x.Address.Contains(words[0]) || x.Address.Contains(words[1])) ||
+						(x.MetroStation != null && (x.MetroStation.Contains(words[0]) || x.MetroStation.Contains(words[1]))));
+			}
+
+			Point? point = null;
+
+			if (userCoordinates != null)
+			{
+				var coordinate = new Coordinate(userCoordinates.Latitude, userCoordinates.Longitude);
+				point = new Point(coordinate) { SRID = 4326 };
+			}
+
+			return await offices
+				.Select(x => new PointShotModel
+				{
+					Id = x.Id,
+					Address = x.Address,
+					Type = PointType.Office,
+					Name = x.Name,
+					DistanceMetres = point != null
+						? x.Location.Distance(point)
+						: null
+				})
+				.ToArrayAsync(token);
+
+		}
+
+		private async Task<PointShotModel[]> SearchAtms(string search, RoutePoint? userCoordinates, CancellationToken token)
+		{
+			if (string.IsNullOrEmpty(search))
+			{
+				return Array.Empty<PointShotModel>();
+			}
+
+			string[] words = search.Split(' ');
+
+			if (words.Length > 2)
+			{
+				words = new string[] { words[0], words[1] };
+			}
+
+			IQueryable<Atm> atms;
+
+			if (words.Length == 1)
+			{
+				string word = words[0];
+
+				atms = _context.Atms
+					.Where(x => x.Address != null && x.Address.Contains(word));
+			}
+			else
+			{
+				atms = _context.Atms
+					.Where(x => x.Address != null && (x.Address.Contains(words[0]) || x.Address.Contains(words[1])));
+			}
+
+			Point? point = null;
+
+			if (userCoordinates != null)
+			{
+				var coordinate = new Coordinate(userCoordinates.Latitude, userCoordinates.Longitude);
+				point = new Point(coordinate) { SRID = 4326 };
+			}
+
+			return await atms
+				.Select(x => new PointShotModel
+				{
+					Id = x.Id,
+					Address = x.Address,
+					Type = PointType.Atm,
+					Name = "Банкомат",
+					DistanceMetres = point != null
+						? x.Location.Distance(point)
+						: null
+				})
+				.ToArrayAsync(token);
 
 		}
 	}

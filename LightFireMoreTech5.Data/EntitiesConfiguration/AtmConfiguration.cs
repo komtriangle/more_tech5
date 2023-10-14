@@ -24,6 +24,11 @@ namespace LightFireMoreTech5.Data.EntitiesConfiguration
 				.Property(x => x.Id)
 				 .ValueGeneratedOnAdd();
 
+			builder
+				.Property(x => x.Address)
+				.HasColumnType("text")
+				.IsRequired(false);
+
 			builder.Property(e => e.Location)
 			   .HasColumnType("geography (Point,4326)")
 			   .IsRequired();
